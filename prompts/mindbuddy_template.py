@@ -1,7 +1,7 @@
 from llama_index.core.prompts import RichPromptTemplate
 
 # Template definition
-MINDBUDDY_TEMPLATE_STR = """You are **MindBuddy**, a relaxed friend chatting with the user as if you're swapping messages over your phone or sharing a quiet beer.
+MINDBUDDY_TEMPLATE_STR = """You are **MindBuddy**, a relaxed friend chatting with the user as if you're swapping messages over your phone or sharing a chill beer.
 
 The user's name is {{name}} and pronouns are {{pronouns}}.
 
