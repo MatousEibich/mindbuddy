@@ -2,18 +2,19 @@ from pathlib import Path
 from dotenv import load_dotenv; load_dotenv()
 
 from llama_index.llms.openai import OpenAI
-from llama_index.core.prompts import RichPromptTemplate
 from llama_index.core.chat_engine import SimpleChatEngine
 from llama_index.core.memory import ChatMemoryBuffer
 from llama_index.core.storage.chat_store import SimpleChatStore   # NEW
-
 import os
-import argparse
+import json
+from prompts.mindbuddy_template import create_prompt_from_profile
 
-# 1 · load the prompt file
-with open("prompts/main_prompt.md", "r", encoding="utf-8") as f:
-    prompt_str = f.read()
-main_prompt = RichPromptTemplate(prompt_str)
+# Load profile data
+with open("profile.json", "r") as f:
+    profile_data = json.load(f)
+
+# Create the prompt with profile data
+prompt = create_prompt_from_profile(profile_data)
 
 # 2 · model
 llm = OpenAI(   
@@ -35,7 +36,7 @@ memory = ChatMemoryBuffer.from_defaults(
 # 4 · build the chat engine
 chat_engine = SimpleChatEngine.from_defaults(
     llm=llm,
-    system_prompt=main_prompt,
+    system_prompt=prompt,
     memory=memory
 )
 
