@@ -90,6 +90,22 @@ npm start    # or expo start
 
 The Expo dev menu will open in your browser and the app can be loaded on a simulator/device using the QR code.
 
+### Ping backend from front-end
+
+To test communication between frontend and backend:
+
+```bash
+# Run the backend API server from another terminal
+cd frontend
+node scripts/ping.mjs
+```
+
+Alternatively, start the Expo web server and use the "Ping API" button on the home screen:
+
+```bash
+npm run web
+```
+
 ## Project Structure
 
 ```
