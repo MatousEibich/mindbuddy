@@ -1,8 +1,8 @@
-"""
-Command-line interface for MindBuddy
+"""Command-line interface for MindBuddy
 """
 
 import sys
+
 from .engine import build_engine
 
 

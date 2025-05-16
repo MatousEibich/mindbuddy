@@ -1,4 +1,5 @@
 from llama_index.core.prompts import RichPromptTemplate
+
 from prompts.conversation_styles import get_style_instructions
 
 # Template definition
@@ -40,8 +41,7 @@ mindbuddy_template = RichPromptTemplate(MINDBUDDY_TEMPLATE_STR)
 
 # Helper function to format the template with user profile data
 def create_prompt_from_profile(profile_data, chat_history="", query_str=""):
-    """
-    Creates a formatted prompt using user profile data
+    """Creates a formatted prompt using user profile data
 
     Args:
         profile_data (dict): User profile information
@@ -50,6 +50,7 @@ def create_prompt_from_profile(profile_data, chat_history="", query_str=""):
 
     Returns:
         str: Formatted prompt ready for the LLM
+
     """
     # Format core facts as a string
     core_facts_str = "\n".join([f"- {fact['text']}" for fact in profile_data["core_facts"]])

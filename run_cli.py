@@ -1,5 +1,4 @@
-"""
-Run the CLI for MindBuddy
+"""Run the CLI for MindBuddy
 """
 
 from src.mindbuddy.cli import main

@@ -1,9 +1,9 @@
-"""
-Configuration management for MindBuddy
+"""Configuration management for MindBuddy
 """
 
 import os
 from pathlib import Path
+
 from dotenv import load_dotenv
 
 # Load environment variables

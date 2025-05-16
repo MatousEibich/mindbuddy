@@ -1,18 +1,16 @@
-"""
-FastAPI implementation for MindBuddy
+"""FastAPI implementation for MindBuddy
 """
 
-import json
-from typing import Dict, Optional, List, Any
+from typing import Any
 
+import uvicorn
 from fastapi import FastAPI, HTTPException, Request, status
+from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from fastapi.exceptions import RequestValidationError
 from pydantic import BaseModel, Field
 from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
-import uvicorn
 
 from .config import API_CONFIG
 from .engine import build_engine, load_profile
@@ -40,7 +38,7 @@ class ProfileData(BaseModel):
     name: str
     pronouns: str
     style: str
-    core_facts: List[Dict[str, Any]]
+    core_facts: list[dict[str, Any]]
 
 
 # Error handler
@@ -84,7 +82,7 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 
 
 # API endpoints
-@app.get("/health", response_model=Dict[str, str])
+@app.get("/health", response_model=dict[str, str])
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
@@ -93,8 +91,7 @@ async def health_check():
 @app.post("/chat", response_model=ChatResponse)
 @limiter.limit(API_CONFIG["rate_limit"])
 async def chat(request: Request, req: ChatRequest):
-    """
-    Send a message to MindBuddy and get a response
+    """Send a message to MindBuddy and get a response
 
     The conversation history is maintained between requests
     """

@@ -1,5 +1,4 @@
-"""
-Run the FastAPI server for MindBuddy
+"""Run the FastAPI server for MindBuddy
 """
 
 import uvicorn

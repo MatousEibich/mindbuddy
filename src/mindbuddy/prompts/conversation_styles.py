@@ -1,5 +1,4 @@
-"""
-Module for handling conversation styles in MindBuddy.
+"""Module for handling conversation styles in MindBuddy.
 """
 
 # Define the style instructions for each style
@@ -24,14 +23,14 @@ Ask them to back up claims with evidence or to consider alternative viewpoints.
 
 
 def get_style_instructions(style):
-    """
-    Returns conversation style instructions based on style name.
+    """Returns conversation style instructions based on style name.
 
     Args:
         style: One of "mom", "middle", or "neil"
 
     Returns:
         str: Style instructions to insert into the prompt
+
     """
     # Normalize input
     if isinstance(style, str):
