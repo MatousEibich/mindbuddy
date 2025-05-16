@@ -1,2 +1,1 @@
-"""Prompt templates for MindBuddy
-"""
+"""Prompt templates for MindBuddy."""

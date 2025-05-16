@@ -1,5 +1,4 @@
-"""Core chat engine for MindBuddy
-"""
+"""Core chat engine for MindBuddy."""
 
 import json
 
@@ -13,13 +12,13 @@ from .prompts.mindbuddy_template import create_prompt_from_profile
 
 
 def load_profile():
-    """Load user profile data from the profile file"""
+    """Load user profile data from the profile file."""
     with open(PROFILE_PATH) as f:
         return json.load(f)
 
 
 def build_engine():
-    """Build and configure the chat engine with memory
+    """Build and configure the chat engine with memory.
 
     Returns:
         tuple: (chat_engine, chat_store) - The configured chat engine and its storage

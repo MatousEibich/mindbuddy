@@ -1,5 +1,4 @@
-"""Command-line interface for MindBuddy
-"""
+"""Command-line interface for MindBuddy."""
 
 import sys
 
@@ -7,30 +6,35 @@ from .engine import build_engine
 
 
 def run_repl():
-    """Run MindBuddy in REPL mode"""
+    """Run MindBuddy in REPL mode."""
     # Build the chat engine and store
     chat_engine, chat_store = build_engine()
-
-    print("MindBuddy REPL – type 'quit' to exit.")
+    
+    print("Welcome to MindBuddy CLI!")
+    print("Type 'exit' or press Ctrl+C to quit.\n")
+    
     try:
         while True:
-            msg = input("you> ").strip()
-            if msg.lower() in {"quit", "exit"}:
+            user_input = input("You: ")
+            if user_input.lower().strip() in ["exit", "quit"]:
+                print("Goodbye!")
                 break
-            reply = chat_engine.chat(msg)
-            print("buddy>", reply)
-            chat_store.persist()  # save after each turn
+                
+            # Process the message and get a response
+            response = chat_engine.chat(user_input)
+            print(f"\nMindBuddy: {response}\n")
+            
+            # Save conversation
+            chat_store.persist()
     except KeyboardInterrupt:
-        print("\nExiting...")
-    finally:
-        chat_store.persist()
-        print("Conversation saved.")
+        print("\nGoodbye!")
+        sys.exit(0)
 
 
 def main():
-    """Main entry point for the CLI"""
+    """Serve as the main entry point for the CLI."""
     run_repl()
 
 
 if __name__ == "__main__":
-    sys.exit(main())
+    main()

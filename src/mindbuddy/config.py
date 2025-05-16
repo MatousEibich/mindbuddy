@@ -1,5 +1,4 @@
-"""Configuration management for MindBuddy
-"""
+"""Configuration management for MindBuddy."""
 
 import os
 from pathlib import Path
@@ -41,7 +40,7 @@ PROFILE_PATH = PROJECT_ROOT / "profile.json"
 
 # Validate configuration
 def validate_config():
-    """Validate critical configuration settings"""
+    """Validate critical configuration settings."""
     if not LLM_CONFIG["api_key"]:
         raise RuntimeError("OPENAI_API_KEY not found in environment variables")
 

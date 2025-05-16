@@ -1,11 +1,10 @@
-"""Run the FastAPI server for MindBuddy
-"""
+"""Run the FastAPI server for MindBuddy."""
 
 import uvicorn
 
 
 def main():
-    """Run the API server"""
+    """Run the API server."""
     uvicorn.run(
         "src.mindbuddy.api:app",
         host="0.0.0.0",

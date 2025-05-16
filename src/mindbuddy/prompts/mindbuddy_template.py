@@ -1,3 +1,5 @@
+"""Module for defining the MindBuddy prompt template."""
+
 from llama_index.core.prompts import RichPromptTemplate
 
 from .conversation_styles import get_style_instructions
@@ -41,7 +43,7 @@ mindbuddy_template = RichPromptTemplate(MINDBUDDY_TEMPLATE_STR)
 
 # Helper function to format the template with user profile data
 def create_prompt_from_profile(profile_data, chat_history="", query_str=""):
-    """Creates a formatted prompt using user profile data
+    """Create a formatted prompt using user profile data.
 
     Args:
         profile_data (dict): User profile information

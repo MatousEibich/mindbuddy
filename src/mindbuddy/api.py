@@ -1,5 +1,4 @@
-"""FastAPI implementation for MindBuddy
-"""
+"""FastAPI implementation for MindBuddy."""
 
 from typing import Any
 
@@ -21,19 +20,19 @@ engine, store = build_engine()
 
 # Data models
 class ChatRequest(BaseModel):
-    """Chat request model"""
+    """Chat request model."""
 
     msg: str = Field(..., description="User message to send to the AI")
 
 
 class ChatResponse(BaseModel):
-    """Chat response model"""
+    """Chat response model."""
 
     reply: str = Field(..., description="AI response to the user message")
 
 
 class ProfileData(BaseModel):
-    """User profile model"""
+    """User profile model."""
 
     name: str
     pronouns: str
@@ -43,7 +42,7 @@ class ProfileData(BaseModel):
 
 # Error handler
 class ErrorResponse(BaseModel):
-    """API error response model"""
+    """API error response model."""
 
     detail: str
 
@@ -74,7 +73,7 @@ app.add_exception_handler(429, _rate_limit_exceeded_handler)
 # Custom error handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
-    """Handle validation errors"""
+    """Handle validation errors."""
     return JSONResponse(
         status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
         content={"detail": str(exc)},
@@ -84,14 +83,14 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
 # API endpoints
 @app.get("/health", response_model=dict[str, str])
 async def health_check():
-    """Health check endpoint"""
+    """Health check endpoint."""
     return {"status": "healthy"}
 
 
 @app.post("/chat", response_model=ChatResponse)
 @limiter.limit(API_CONFIG["rate_limit"])
 async def chat(request: Request, req: ChatRequest):
-    """Send a message to MindBuddy and get a response
+    """Send a message to MindBuddy and get a response.
 
     The conversation history is maintained between requests
     """
@@ -106,12 +105,12 @@ async def chat(request: Request, req: ChatRequest):
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error processing message: {str(e)}",
-        )
+        ) from e
 
 
 @app.get("/profile", response_model=ProfileData)
 async def get_profile():
-    """Get the current user profile"""
+    """Get the current user profile."""
     try:
         profile = load_profile()
         return profile
@@ -119,11 +118,11 @@ async def get_profile():
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Error loading profile: {str(e)}",
-        )
+        ) from e
 
 
 def run_server():
-    """Run the FastAPI server"""
+    """Run the FastAPI server."""
     uvicorn.run(
         "src.mindbuddy.api:app",
         host="0.0.0.0",
