@@ -79,6 +79,17 @@ API documentation is available at:
 - Swagger UI: http://localhost:8000/docs
 - ReDoc: http://localhost:8000/redoc
 
+### Running the front-end
+
+To run the React Native front-end:
+
+```bash
+cd frontend
+npm start    # or expo start
+```
+
+The Expo dev menu will open in your browser and the app can be loaded on a simulator/device using the QR code.
+
 ## Project Structure
 
 ```
@@ -88,6 +99,7 @@ mindbuddy/
 ├── pyproject.toml           # Project metadata and dependencies
 ├── run_api.py               # Script to run the API server
 ├── run_cli.py               # Script to run the CLI
+├── frontend/                # React Native / Expo frontend
 └── src/
     └── mindbuddy/
         ├── __init__.py
