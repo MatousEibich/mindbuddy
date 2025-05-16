@@ -2,8 +2,14 @@ export default {
   expo: {
     name: "MindBuddy",
     slug: "mindbuddy",
-    extra: {
-      API_URL: process.env.API_URL || "http://localhost:8000"
+    ios: {
+      supportsTablet: true
+    },
+    android: {
+      adaptiveIcon: {
+        foregroundImage: "./assets/icon.png",
+        backgroundColor: "#FFFFFF"
+      }
     }
   }
 }; 

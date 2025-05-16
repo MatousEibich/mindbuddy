@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { StyleSheet, Text, View, Button, ActivityIndicator } from 'react-native';
-import Constants from 'expo-constants';
 import { chat } from '../../src/utils/api';
 
+// Use the same hardcoded URL across the app
+const API_URL = "http://192.168.10.112:8000";
+
 export default function HomeScreen() {
-  // Access API_URL from Constants
-  const apiUrl = Constants.manifest?.extra?.API_URL || 'API URL not found';
   const [response, setResponse] = useState('');
   const [loading, setLoading] = useState(false);
   
@@ -13,8 +13,10 @@ export default function HomeScreen() {
     setLoading(true);
     try {
       const reply = await chat("Hello API");
+      console.log("MindBuddy says:", reply);
       setResponse(reply);
     } catch (error) {
+      console.error("Error:", error.message);
       setResponse(`Error: ${error.message}`);
     } finally {
       setLoading(false);
@@ -25,9 +27,9 @@ export default function HomeScreen() {
     <View style={styles.container}>
       <Text style={styles.title}>MindBuddy</Text>
       <Text style={styles.subtitle}>Your mental health companion</Text>
-      <Text style={styles.apiText}>API URL: {apiUrl}</Text>
+      <Text style={styles.apiText}>API URL: {API_URL}</Text>
       
-      <Button title="Ping API" onPress={pingApi} />
+      <Button title="Ping MindBuddy" onPress={pingApi} />
       
       {loading ? (
         <ActivityIndicator style={styles.loader} />

@@ -1,8 +1,12 @@
 import { registerRootComponent } from 'expo';
-
+import { LogBox } from 'react-native';
 import App from './App';
 
-// registerRootComponent calls AppRegistry.registerComponent('main', () => App);
-// It also ensures that whether you load the app in Expo Go or in a native build,
-// the environment is set up appropriately
+// Silence warnings related to Constants.manifest deprecation
+LogBox.ignoreLogs([
+  'Constants.manifest has been deprecated',
+  'Constants.manifest is null'
+]);
+
+// Register the main App component
 registerRootComponent(App);

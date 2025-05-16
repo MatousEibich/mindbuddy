@@ -90,6 +90,52 @@ npm start    # or expo start
 
 The Expo dev menu will open in your browser and the app can be loaded on a simulator/device using the QR code.
 
+### Running on device
+
+To test the app on a physical device with the backend:
+
+1. Start the FastAPI server on all interfaces:
+   ```bash
+   python run_api.py   # Already configured to use host 0.0.0.0
+   ```
+
+2. Find your LAN IP address:
+   - Windows: `ipconfig` 
+   - macOS/Linux: `ipconfig getifaddr en0` or `hostname -I`
+
+3. Update the hardcoded API URLs in the frontend code with your LAN IP:
+   - Edit `frontend/src/utils/api.js` (or `api.ts`)
+   - Edit `frontend/app/screens/HomeScreen.js`
+   - Edit `frontend/app/screens/ConnectivityScreen.js`
+   
+   Replace `192.168.10.112` with your actual IP address.
+
+4. Start Expo from the frontend directory:
+   ```bash
+   cd frontend
+   npx expo start        # then scan QR with Expo Go
+   ```
+
+5. If same-WiFi connection fails, try using a tunnel:
+   ```bash
+   # Start Expo with tunneling
+   cd frontend
+   npx expo start --tunnel
+   ```
+   
+   Or use ngrok:
+   ```bash
+   # Install ngrok globally
+   npm i -g ngrok
+   
+   # Expose your local backend
+   ngrok http 8000
+   ```
+   
+   Then update the hardcoded API URLs with the ngrok URL.
+
+See `frontend/DEVICE_TESTING.md` for more detailed information.
+
 ### Ping backend from front-end
 
 To test communication between frontend and backend:
