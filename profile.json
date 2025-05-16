@@ -1,6 +1,7 @@
 {
     "name": "Matouš",
     "pronouns": "he/him",
+    "style": "neil",
     "core_facts": [
       { "id": 1, "text": "I'm currently doing a mesocycle with calisthenics." },
       { "id": 2, "text": "I've got a dog named Rosie, she's the best." }

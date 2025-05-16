@@ -20,7 +20,25 @@ classifiers = [
     "Intended Audience :: End Users/Desktop",
     "Topic :: Office/Business :: News/Diary",
 ]
-dependencies = []
+dependencies = [
+    "llama-index>=0.10.0",
+    "fastapi>=0.104.0",
+    "uvicorn>=0.23.0",
+    "slowapi>=0.1.8",
+    "python-dotenv>=1.0.0",
+    "pydantic>=2.4.0",
+]
+
+[project.scripts]
+mindbuddy-cli = "src.mindbuddy.cli:main"
+mindbuddy-api = "src.mindbuddy.api:run_server"
 
 [tool.setuptools]
-package-dir = {"" = "src"} 
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py39" 
