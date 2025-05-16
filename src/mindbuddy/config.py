@@ -1,6 +1,7 @@
 """
 Configuration management for MindBuddy
 """
+
 import os
 from pathlib import Path
 from dotenv import load_dotenv
@@ -37,13 +38,14 @@ STORAGE_CONFIG = {
 # Profile configuration
 PROFILE_PATH = PROJECT_ROOT / "profile.json"
 
+
 # Validate configuration
 def validate_config():
     """Validate critical configuration settings"""
     if not LLM_CONFIG["api_key"]:
         raise RuntimeError("OPENAI_API_KEY not found in environment variables")
-    
+
     if not PROFILE_PATH.exists():
         raise FileNotFoundError(f"Profile file not found at {PROFILE_PATH}")
-    
-    return True 
+
+    return True

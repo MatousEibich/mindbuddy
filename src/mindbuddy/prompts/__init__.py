@@ -1,3 +1,3 @@
 """
 Prompt templates for MindBuddy
-""" 
+"""

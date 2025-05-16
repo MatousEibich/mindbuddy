@@ -1,6 +1,7 @@
 """
 FastAPI implementation for MindBuddy
 """
+
 import json
 from typing import Dict, Optional, List, Any
 
@@ -19,26 +20,35 @@ from .engine import build_engine, load_profile
 # Initialize chat engine and store
 engine, store = build_engine()
 
+
 # Data models
 class ChatRequest(BaseModel):
     """Chat request model"""
+
     msg: str = Field(..., description="User message to send to the AI")
+
 
 class ChatResponse(BaseModel):
     """Chat response model"""
+
     reply: str = Field(..., description="AI response to the user message")
+
 
 class ProfileData(BaseModel):
     """User profile model"""
+
     name: str
     pronouns: str
     style: str
     core_facts: List[Dict[str, Any]]
 
+
 # Error handler
 class ErrorResponse(BaseModel):
     """API error response model"""
+
     detail: str
+
 
 # Application setup
 app = FastAPI(
@@ -62,6 +72,7 @@ limiter = Limiter(key_func=get_remote_address)
 app.state.limiter = limiter
 app.add_exception_handler(429, _rate_limit_exceeded_handler)
 
+
 # Custom error handler
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(request: Request, exc: RequestValidationError):
@@ -71,26 +82,25 @@ async def validation_exception_handler(request: Request, exc: RequestValidationE
         content={"detail": str(exc)},
     )
 
+
 # API endpoints
 @app.get("/health", response_model=Dict[str, str])
 async def health_check():
     """Health check endpoint"""
     return {"status": "healthy"}
 
+
 @app.post("/chat", response_model=ChatResponse)
 @limiter.limit(API_CONFIG["rate_limit"])
 async def chat(request: Request, req: ChatRequest):
     """
     Send a message to MindBuddy and get a response
-    
+
     The conversation history is maintained between requests
     """
     if not req.msg.strip():
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Empty message"
-        )
-    
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Empty message")
+
     try:
         reply = engine.chat(req.msg)
         store.persist()
@@ -98,8 +108,9 @@ async def chat(request: Request, req: ChatRequest):
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error processing message: {str(e)}"
+            detail=f"Error processing message: {str(e)}",
         )
+
 
 @app.get("/profile", response_model=ProfileData)
 async def get_profile():
@@ -110,9 +121,10 @@ async def get_profile():
     except Exception as e:
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail=f"Error loading profile: {str(e)}"
+            detail=f"Error loading profile: {str(e)}",
         )
-        
+
+
 def run_server():
     """Run the FastAPI server"""
     uvicorn.run(
@@ -120,4 +132,4 @@ def run_server():
         host="0.0.0.0",
         port=8000,
         reload=True,
-    ) 
+    )

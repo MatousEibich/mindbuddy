@@ -37,26 +37,27 @@ And here is the user's latest message:
 # Create template object
 mindbuddy_template = RichPromptTemplate(MINDBUDDY_TEMPLATE_STR)
 
+
 # Helper function to format the template with user profile data
 def create_prompt_from_profile(profile_data, chat_history="", query_str=""):
     """
     Creates a formatted prompt using user profile data
-    
+
     Args:
         profile_data (dict): User profile information
         chat_history (str): Conversation history
         query_str (str): Current query from user
-        
+
     Returns:
         str: Formatted prompt ready for the LLM
     """
     # Format core facts as a string
     core_facts_str = "\n".join([f"- {fact['text']}" for fact in profile_data["core_facts"]])
-    
+
     # Get style instructions based on profile preference
     style = profile_data.get("style", "middle")
     style_instructions = get_style_instructions(style)
-    
+
     # Create the prompt with profile data
     return mindbuddy_template.format(
         name=profile_data["name"],
@@ -65,5 +66,5 @@ def create_prompt_from_profile(profile_data, chat_history="", query_str=""):
         style_instructions=style_instructions,
         CRISIS_HANDOFF="EMERGENCY: Please call a crisis helpline immediately.",
         chat_history=chat_history,
-        query_str=query_str
-    ) 
+        query_str=query_str,
+    )

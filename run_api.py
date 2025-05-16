@@ -1,7 +1,9 @@
 """
 Run the FastAPI server for MindBuddy
 """
+
 import uvicorn
+
 
 def main():
     """Run the API server"""
@@ -12,5 +14,6 @@ def main():
         reload=True,
     )
 
+
 if __name__ == "__main__":
-    main() 
+    main()

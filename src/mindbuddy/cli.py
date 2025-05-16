@@ -1,8 +1,10 @@
 """
 Command-line interface for MindBuddy
 """
+
 import sys
 from .engine import build_engine
+
 
 def run_repl():
     """Run MindBuddy in REPL mode"""
@@ -24,9 +26,11 @@ def run_repl():
         chat_store.persist()
         print("Conversation saved.")
 
+
 def main():
     """Main entry point for the CLI"""
     run_repl()
 
+
 if __name__ == "__main__":
-    sys.exit(main()) 
+    sys.exit(main())
