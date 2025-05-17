@@ -9,6 +9,7 @@ import { SafeAreaProvider } from 'react-native-safe-area-context';
 import HomeScreen from './app/screens/HomeScreen';
 import SettingsScreen from './app/screens/SettingsScreen';
 import ConnectivityScreen from './app/screens/ConnectivityScreen';
+import ChatScreen from './app/screens/Chat';
 
 const Tab = createBottomTabNavigator();
 
@@ -27,6 +28,8 @@ export default function App() {
                 iconName = focused ? 'settings' : 'settings-outline';
               } else if (route.name === 'Connectivity') {
                 iconName = focused ? 'wifi' : 'wifi-outline';
+              } else if (route.name === 'Chat') {
+                iconName = focused ? 'chatbubbles' : 'chatbubbles-outline';
               }
 
               return <Ionicons name={iconName} size={size} color={color} />;
@@ -36,6 +39,7 @@ export default function App() {
           })}
         >
           <Tab.Screen name="Home" component={HomeScreen} />
+          <Tab.Screen name="Chat" component={ChatScreen} />
           <Tab.Screen name="Connectivity" component={ConnectivityScreen} />
           <Tab.Screen name="Settings" component={SettingsScreen} />
         </Tab.Navigator>
