@@ -1,11 +1,18 @@
 import Dexie, { Table } from "dexie";
 import { Message } from "./message";
+import { Profile } from "./types";
 
 class MindBuddyDB extends Dexie {
   messages!: Table<Message, string>;
+  profile!: Table<Profile, string>;
+  
   constructor() {
     super("mindbuddy.v1");
     this.version(1).stores({ messages: "id, ts" });
+    this.version(2).stores({
+      messages: "id, ts",
+      profile: "name"          // just one row keyed by name
+    });
   }
 }
 export const db = new MindBuddyDB();

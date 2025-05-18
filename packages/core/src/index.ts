@@ -3,3 +3,4 @@ export * from "./types";
 export * from "./runMindBuddy";
 export * from "./message";
 export * from "./chain";
+export * from "./profile";
