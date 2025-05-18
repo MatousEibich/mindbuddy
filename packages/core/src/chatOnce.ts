@@ -3,7 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { renderPrompt, stringifyHistory } from "./renderPrompt";
 import { Profile } from "./types";
 import { Message } from "./message";
-import { loadHistory, saveMessage } from "./storage";
+import { loadLastN, saveMessage } from "./db";
 
 const llm = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0.7 });
 
@@ -18,7 +18,7 @@ export async function chatOnce(
     ts: Date.now(),
   };
 
-  const history = loadHistory();
+  const history = await loadLastN();
   const prompt = await renderPrompt(
     profile,
     stringifyHistory(history, profile),
@@ -34,8 +34,8 @@ export async function chatOnce(
     ts: Date.now(),
   };
 
-  saveMessage(userMsg);
-  saveMessage(botMsg);
+  await saveMessage(userMsg);
+  await saveMessage(botMsg);
 
   return reply.content as string;
 } 

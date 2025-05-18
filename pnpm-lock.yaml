@@ -14,12 +14,18 @@ importers:
       '@langchain/openai':
         specifier: ^0.5.10
         version: 0.5.10(@langchain/core@0.3.56(openai@4.100.0(zod@3.24.4)))
+      dexie:
+        specifier: 4.0.11
+        version: 4.0.11
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
       langchain:
         specifier: ^0.3.26
         version: 0.3.26(@langchain/core@0.3.56(openai@4.100.0(zod@3.24.4)))(openai@4.100.0(zod@3.24.4))
+      scrypt-js:
+        specifier: ^3.0.1
+        version: 3.0.1
     devDependencies:
       '@biomejs/biome':
         specifier: ^1.9.4
@@ -97,6 +103,9 @@ importers:
       '@langchain/openai':
         specifier: ^0.5.10
         version: 0.5.10(@langchain/core@0.3.56(openai@4.100.0(zod@3.24.4)))
+      dexie:
+        specifier: 4.0.11
+        version: 4.0.11
       dotenv:
         specifier: ^16.5.0
         version: 16.5.0
@@ -853,6 +862,9 @@ packages:
     resolution: {integrity: sha512-ZySD7Nf91aLB0RxL4KGrKHBXl7Eds1DAmEdcoVawXnLD7SDhpNgtuII2aAkg7a7QS41jxPSZ17p4VdGnMHk3MQ==}
     engines: {node: '>=0.4.0'}
 
+  dexie@4.0.11:
+    resolution: {integrity: sha512-SOKO002EqlvBYYKQSew3iymBoN2EQ4BDw/3yprjh7kAfFzjBYkaMNa/pZvcA7HSWlcKSQb9XhPe3wKyQ0x4A8A==}
+
   diff@4.0.2:
     resolution: {integrity: sha512-58lmxKSA4BNyLz+HHMUzlOEpg09FV+ev6ZMe3vJihgdxzgcwZ8VoEEPmALCZG9LmqfVoNMMKpttIYTVG6uDY7A==}
     engines: {node: '>=0.3.1'}
@@ -1402,6 +1414,9 @@ packages:
 
   scheduler@0.26.0:
     resolution: {integrity: sha512-NlHwttCI/l5gCPR3D1nNXtWABUmBwvZpEQiD4IXSbIDq8BzLIK/7Ir5gTFSGZDUu37K5cMNp0hFtzO38sC7gWA==}
+
+  scrypt-js@3.0.1:
+    resolution: {integrity: sha512-cdwTTnqPu0Hyvf5in5asVdZocVDTNRmR7XEcJuIzMjJeSHybHl7vpB66AzwTaIg6CLSbtjcxc8fqcySfnTkccA==}
 
   semver@6.3.1:
     resolution: {integrity: sha512-BR7VvDCVHO+q2xBEWskxS6DJE1qRnb7DxzUrogb71CWoSficBxYsiAGd+Kl0mmq/MprG9yArRkyrQxTO6XjMzA==}
@@ -2283,6 +2298,8 @@ snapshots:
 
   delayed-stream@1.0.0: {}
 
+  dexie@4.0.11: {}
+
   diff@4.0.2: {}
 
   dotenv@16.5.0: {}
@@ -2792,6 +2809,8 @@ snapshots:
       queue-microtask: 1.2.3
 
   scheduler@0.26.0: {}
+
+  scrypt-js@3.0.1: {}
 
   semver@6.3.1: {}
 
