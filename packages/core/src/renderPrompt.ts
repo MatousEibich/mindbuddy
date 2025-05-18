@@ -1,8 +1,15 @@
 import { PromptTemplate } from "@langchain/core/prompts";
 import { Profile, CRISIS_HANDOFF } from "./types";
 import { MINDBUDDY_TEMPLATE, STYLE_INSTRUCTIONS } from "./prompt";
+import { Message } from "./message";
 
 const tmpl = PromptTemplate.fromTemplate(MINDBUDDY_TEMPLATE);
+
+export function stringifyHistory(messages: Message[], profile?: Profile): string {
+  return messages
+    .map(m => `${m.role === "user" ? profile?.name || "User" : "MindBuddy"}: ${m.content}`)
+    .join("\n");
+}
 
 export function renderPrompt(
   profile: Profile,
