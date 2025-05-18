@@ -1,5 +1,6 @@
-import { useState } from "react";
-import { chatOnce, Profile, Message } from "@mindbuddy/core";
+import { useState, useRef, useEffect } from "react";
+import { buildMindBuddyChain } from "@mindbuddy/core";
+import type { Profile } from "@mindbuddy/core";
 import viteLogo from "/vite.svg";
 import reactLogo from "./assets/react.svg";
 import "./App.css";
@@ -16,19 +17,24 @@ export default function App() {
 	const [text, setText] = useState("");
 	const [messages, setMessages] = useState<{ role: "user" | "assistant", content: string }[]>([]);
 	const [isLoading, setIsLoading] = useState(false);
+	const chainRef = useRef<Awaited<ReturnType<typeof buildMindBuddyChain>>>();
+	
+	useEffect(() => {
+		buildMindBuddyChain(profile).then(c => (chainRef.current = c));
+	}, []);
 
 	async function send() {
-		if (!text.trim()) return;
+		if (!text.trim() || !chainRef.current) return;
 		
 		// Add user message to UI
 		setMessages((old) => [...old, { role: "user", content: text }]);
 		setIsLoading(true);
 		
 		try {
-			// Get bot response
-			const botResponse = await chatOnce(profile, text);
+			// Get bot response using the chain
+			const reply = await chainRef.current.invoke({ query: text });
 			// Add bot message to UI
-			setMessages((old) => [...old, { role: "assistant", content: botResponse }]);
+			setMessages((old) => [...old, { role: "assistant", content: reply.text }]);
 		} catch (error) {
 			console.error("Error sending message:", error);
 		} finally {
