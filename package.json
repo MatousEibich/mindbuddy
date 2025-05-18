@@ -2,7 +2,10 @@
 	"name": "mindbuddy",
 	"version": "1.0.0",
 	"private": true,
-	"workspaces": ["packages/*", "apps/*"],
+	"workspaces": [
+		"packages/*",
+		"apps/*"
+	],
 	"description": "",
 	"main": "index.js",
 	"scripts": {
@@ -19,5 +22,11 @@
 		"@typescript-eslint/parser": "^8.32.1",
 		"typescript": "~5.8.3",
 		"vite": "^6.3.5"
+	},
+	"dependencies": {
+		"@langchain/core": "^0.3.56",
+		"@langchain/openai": "^0.5.10",
+		"dotenv": "^16.5.0",
+		"langchain": "^0.3.26"
 	}
 }
