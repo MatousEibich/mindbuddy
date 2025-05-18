@@ -63,3 +63,24 @@ chat_store.json
 /frontend/*.mobileprovision
 /frontend/*.orig.*
 /frontend/web-build
+
+# Dependencies
+node_modules/
+.pnpm-store/
+
+# Build outputs
+*.tsbuildinfo
+
+# Environment
+.env.*
+!.env.example
+
+# Testing
+coverage/
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Vite
+*.local

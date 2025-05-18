@@ -1,0 +1,23 @@
+{
+	"name": "mindbuddy",
+	"version": "1.0.0",
+	"private": true,
+	"workspaces": ["packages/*", "apps/*"],
+	"description": "",
+	"main": "index.js",
+	"scripts": {
+		"test": "echo \"Error: no test specified\" && exit 1"
+	},
+	"keywords": [],
+	"author": "",
+	"license": "ISC",
+	"packageManager": "pnpm@10.11.0",
+	"devDependencies": {
+		"@biomejs/biome": "^1.9.4",
+		"@types/node": "^22.15.18",
+		"@typescript-eslint/eslint-plugin": "^8.32.1",
+		"@typescript-eslint/parser": "^8.32.1",
+		"typescript": "~5.8.3",
+		"vite": "^6.3.5"
+	}
+}
