@@ -1,2 +1,5 @@
 // UI component exports will go here
-export {};
+import ChatApp from './ChatApp';
+
+export default ChatApp;
+export { ChatApp };
