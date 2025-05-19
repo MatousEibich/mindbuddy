@@ -26,7 +26,6 @@
 	"dependencies": {
 		"@langchain/core": "^0.3.56",
 		"@langchain/openai": "^0.5.10",
-		"dexie": "4.0.11",
 		"dotenv": "^16.5.0",
 		"langchain": "^0.3.26",
 		"scrypt-js": "^3.0.1"

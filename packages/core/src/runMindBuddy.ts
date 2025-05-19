@@ -3,7 +3,7 @@ import { ChatOpenAI } from "@langchain/openai";
 import { renderPrompt } from "./renderPrompt";
 import { Profile } from "./types";
 
-const llm = new ChatOpenAI({ model: "gpt-4o-mini", temperature: 0.7 });
+const llm = new ChatOpenAI({ model: "gpt-4o", temperature: 0 });
 
 export async function runMindBuddy(
   profile: Profile,

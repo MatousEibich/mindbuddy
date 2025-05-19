@@ -14,6 +14,12 @@ config.resolver.extraNodeModules = {
   crypto: require.resolve('crypto-browserify'),
   stream: require.resolve('stream-browserify'),
   buffer: require.resolve('buffer'),
+  events: require.resolve('events'),
+  inherits: require.resolve('inherits'),
+  process: require.resolve('process/browser'),
+  zlib: require.resolve('browserify-zlib'),
+  util: require.resolve('util'),
+  assert: require.resolve('assert/'),
 };
 
 module.exports = config; 

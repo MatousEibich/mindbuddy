@@ -13,8 +13,8 @@ import {
   LogBox
 } from 'react-native';
 import type { Profile } from '../../core/src/types';
-// Import our mobile-friendly mock instead of the actual chain
-import { buildMobileFriendlyChain } from './mock-mobile-chain';
+// Import the real chain instead of the mobile-friendly mock
+import { buildMindBuddyChain } from '../../core/src/chain';
 
 // Disable specific warnings for development
 LogBox.ignoreLogs(['Require cycle:']);
@@ -50,12 +50,37 @@ const ChatApp = () => {
   const chainRef = useRef<any>(null);
   const flatListRef = useRef<FlatList | null>(null);
 
+  // Add a debug state to track chain initialization
+  const [chainStatus, setChainStatus] = useState<'initializing' | 'success' | 'error'>('initializing');
+
   useEffect(() => {
-    // Initialize mobile-friendly chain
-    debug("Creating mobile-friendly chain");
-    // No async needed since our mock doesn't use async/await for initialization
-    chainRef.current = buildMobileFriendlyChain(profile);
-    debug("Mobile chain initialized");
+    // Initialize real chain
+    debug("Creating mind buddy chain", { profileName: profile.name });
+    
+    // Verify process.env is available
+    debug("Checking process.env", {
+      hasProcess: typeof process !== 'undefined',
+      hasEnv: typeof process !== 'undefined' && !!process.env,
+      hasKey: typeof process !== 'undefined' && !!process.env.OPENAI_API_KEY,
+      keyPrefix: typeof process !== 'undefined' && process.env.OPENAI_API_KEY 
+        ? process.env.OPENAI_API_KEY.substring(0, 5) : 'none'
+    });
+
+    buildMindBuddyChain(profile)
+      .then((chain: any) => {
+        chainRef.current = chain;
+        setChainStatus('success');
+        debug("Chain initialized successfully", { 
+          hasInvoke: typeof chain.invoke === 'function'
+        });
+      })
+      .catch((error: any) => {
+        setChainStatus('error');
+        debug("Chain initialization failed", { 
+          error: error instanceof Error ? error.message : String(error),
+          stack: error instanceof Error ? error.stack : undefined
+        });
+      });
   }, [profile]);
 
   const sendMessage = async () => {
@@ -77,7 +102,11 @@ const ChatApp = () => {
     setIsLoading(true);
     
     try {
-      debug("Checking chain reference");
+      debug("Checking chain reference", { 
+        chainInitialized: !!chainRef.current,
+        chainStatus
+      });
+      
       if (!chainRef.current) {
         debug("Chain reference is null or undefined");
         throw new Error("Chat system not initialized");
@@ -124,6 +153,11 @@ const ChatApp = () => {
         <Text style={styles.headerText}>
           Hey {profile.name}, I'm here for you! What's on your mind?
         </Text>
+        {chainStatus === 'error' && (
+          <Text style={styles.errorText}>
+            Error initializing AI. Please check your connection.
+          </Text>
+        )}
       </View>
       
       <KeyboardAvoidingView 
@@ -164,7 +198,7 @@ const ChatApp = () => {
           <TouchableOpacity 
             style={[styles.sendButton, !text.trim() && styles.disabledButton]}
             onPress={sendMessage}
-            disabled={!text.trim() || isLoading}
+            disabled={!text.trim() || isLoading || chainStatus === 'error'}
           >
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>
@@ -190,6 +224,11 @@ const styles = StyleSheet.create({
   headerText: {
     fontSize: 16,
     fontWeight: '500',
+  },
+  errorText: {
+    color: 'red',
+    fontSize: 14,
+    marginTop: 4,
   },
   messageList: {
     flex: 1,
