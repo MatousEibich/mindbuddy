@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,16 +10,34 @@ import {
   Platform,
   KeyboardAvoidingView,
 } from 'react-native';
+import { OPENAI_API_KEY } from '@env';
+
+// Configure global process.env shim for compatibility with the core package
+globalThis.process = {
+  env: {
+    OPENAI_API_KEY,
+  },
+} as any;
 
 /**
- * Simple placeholder component to test basic rendering
- * Once this works, we can replace it with the full ChatApp
+ * Main App component
  */
-const SimpleChatApp = () => {
+const App = () => {
   const [messages, setMessages] = useState<{text: string, isUser: boolean}[]>([
     {text: 'Welcome to MindBuddy! How can I help you today?', isUser: false}
   ]);
   const [input, setInput] = useState('');
+
+  // Optional: Add validation and warning for API key
+  useEffect(() => {
+    if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith("sk-")) {
+      console.warn("Missing or invalid OpenAI key.");
+      // Optionally show UI alert
+    } else {
+      console.log("OpenAI API key loaded successfully:", OPENAI_API_KEY.substring(0, 5) + '...');
+      console.log("process.env.OPENAI_API_KEY:", process.env.OPENAI_API_KEY?.substring(0, 5) + '...');
+    }
+  }, []);
 
   // Simple function to add messages
   const handleSend = () => {
@@ -153,4 +171,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default SimpleChatApp;
+export default App;
