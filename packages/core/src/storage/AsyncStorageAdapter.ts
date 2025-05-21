@@ -22,9 +22,12 @@ export class AsyncStorageAdapter implements StorageInterface {
     logger.debug(`Loading last ${n} messages from storage`);
     try {
       const raw = await this.asyncStorage.getItem(STORAGE.MSG_KEY);
-      logger.debug("Raw storage data", { raw: raw ? `${raw.substring(0, 50)}...` : null });
+      logger.debug("Raw storage data", { 
+        raw: typeof raw === 'string' && raw ? `${raw.substring(0, 50)}...` : null,
+        type: typeof raw
+      });
       
-      const all: Message[] = raw ? JSON.parse(raw) : [];
+      const all: Message[] = typeof raw === 'string' && raw ? JSON.parse(raw) : [];
       logger.debug("Parsed messages", { count: all.length });
       
       const result = all.slice(-n);
@@ -41,9 +44,12 @@ export class AsyncStorageAdapter implements StorageInterface {
     logger.debug("Saving message", { id: m.id, role: m.role });
     try {
       const raw = await this.asyncStorage.getItem(STORAGE.MSG_KEY);
-      logger.debug("Existing storage data", { exists: !!raw });
+      logger.debug("Existing storage data", { 
+        exists: !!raw,
+        type: typeof raw
+      });
       
-      const all: Message[] = raw ? JSON.parse(raw) : [];
+      const all: Message[] = typeof raw === 'string' && raw ? JSON.parse(raw) : [];
       logger.debug("Existing message count", { count: all.length });
       
       all.push(m);
@@ -61,9 +67,12 @@ export class AsyncStorageAdapter implements StorageInterface {
     logger.debug("Loading profile");
     try {
       const raw = await this.asyncStorage.getItem(STORAGE.PROFILE_KEY);
-      logger.debug("Raw profile data", { exists: !!raw });
+      logger.debug("Raw profile data", { 
+        exists: !!raw,
+        type: typeof raw
+      });
       
-      const profile = raw ? JSON.parse(raw) : null;
+      const profile = typeof raw === 'string' && raw ? JSON.parse(raw) : null;
       logger.debug("Parsed profile", { name: profile?.name });
       
       return profile;

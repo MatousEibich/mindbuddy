@@ -8,6 +8,18 @@ import { DEBUG } from '../config';
 export function createLogger(namespace: string) {
   const prefix = `[${namespace}]`;
   
+  /**
+   * Safely stringify data, handling circular references
+   */
+  const safeStringify = (data: any): string => {
+    try {
+      return JSON.stringify(data, null, 2);
+    } catch (error) {
+      // Handle circular references or other JSON.stringify errors
+      return String(data);
+    }
+  };
+  
   return {
     /**
      * Log a debug message (only shown when debug is enabled)
@@ -16,7 +28,7 @@ export function createLogger(namespace: string) {
       if (!DEBUG.ENABLED) return;
       
       const logMessage = data 
-        ? `${message}: ${JSON.stringify(data, null, 2)}`
+        ? `${message}: ${safeStringify(data)}`
         : message;
         
       console.log(`${prefix} ${logMessage}`);
@@ -26,9 +38,17 @@ export function createLogger(namespace: string) {
      * Log an error message
      */
     error: (message: string, error?: any) => {
-      const errorDetails = error instanceof Error 
-        ? { message: error.message, stack: error.stack }
-        : String(error);
+      let errorDetails: any;
+      
+      if (error instanceof Error) {
+        errorDetails = { message: error.message, stack: error.stack };
+      } else if (error !== undefined && error !== null) {
+        try {
+          errorDetails = String(error);
+        } catch (e) {
+          errorDetails = "Unserializable error object";
+        }
+      }
         
       console.error(`${prefix} ${message}`, errorDetails);
     },

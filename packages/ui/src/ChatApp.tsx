@@ -17,6 +17,23 @@ import type { Profile } from '../../core/src/types';
 import { buildMindBuddyChain } from '../../core/src/chain';
 import { getDefaultStorage } from '../../core/src/storage';
 
+// Declare global process for React Native
+declare global {
+  interface Window {
+    process?: {
+      env?: {
+        OPENAI_API_KEY?: string;
+      };
+    };
+  }
+  
+  var process: {
+    env: {
+      OPENAI_API_KEY?: string;
+    };
+  };
+}
+
 // Disable specific warnings for development
 LogBox.ignoreLogs(['Require cycle:']);
 
@@ -89,13 +106,17 @@ const ChatApp = () => {
     // Initialize real chain
     debug("Creating mind buddy chain", { profileName: profile.name });
     
-    // Verify process.env is available
+    // Verify process.env is available using type guards
+    const hasProcess = typeof globalThis !== 'undefined' && !!globalThis.process;
+    const hasEnv = hasProcess && !!globalThis.process.env;
+    const apiKey = hasEnv ? globalThis.process.env.OPENAI_API_KEY : undefined;
+    const keyPrefix = apiKey ? apiKey.substring(0, 5) : 'none';
+    
     debug("Checking process.env", {
-      hasProcess: typeof process !== 'undefined',
-      hasEnv: typeof process !== 'undefined' && !!process.env,
-      hasKey: typeof process !== 'undefined' && !!process.env.OPENAI_API_KEY,
-      keyPrefix: typeof process !== 'undefined' && process.env.OPENAI_API_KEY 
-        ? process.env.OPENAI_API_KEY.substring(0, 5) : 'none'
+      hasProcess,
+      hasEnv,
+      hasKey: !!apiKey,
+      keyPrefix
     });
 
     buildMindBuddyChain(profile)
@@ -210,18 +231,22 @@ const ChatApp = () => {
         <FlatList
           ref={flatListRef}
           data={messages}
-          keyExtractor={(item) => item.id}
+          keyExtractor={(item) => item?.id || String(Date.now() + Math.random())}
           style={styles.messageList}
           contentContainerStyle={styles.messageContent}
           onContentSizeChange={() => flatListRef.current?.scrollToEnd({ animated: true })}
-          renderItem={({ item }) => (
-            <View style={[
-              styles.messageBubble,
-              item.role === 'user' ? styles.userBubble : styles.assistantBubble
-            ]}>
-              <Text style={styles.messageText}>{item.content}</Text>
-            </View>
-          )}
+          renderItem={({ item }) => {
+            if (!item) return null;
+            
+            return (
+              <View style={[
+                styles.messageBubble,
+                item.role === 'user' ? styles.userBubble : styles.assistantBubble
+              ]}>
+                <Text style={styles.messageText}>{item.content || ''}</Text>
+              </View>
+            );
+          }}
         />
         
         {isLoading && (

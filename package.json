@@ -26,8 +26,25 @@
 	"dependencies": {
 		"@langchain/core": "^0.3.56",
 		"@langchain/openai": "^0.5.10",
+		"assert": "^2.1.0",
+		"browserify-zlib": "^0.2.0",
+		"buffer": "^6.0.3",
+		"crypto-browserify": "^3.12.1",
 		"dotenv": "^16.5.0",
+		"events": "^3.3.0",
+		"inherits": "^2.0.4",
 		"langchain": "^0.3.26",
-		"scrypt-js": "^3.0.1"
+		"os-browserify": "^0.3.0",
+		"path-browserify": "^1.0.1",
+		"process": "^0.11.10",
+		"react-native-fs": "^2.20.0",
+		"scrypt-js": "^3.0.1",
+		"stream-browserify": "^3.0.0",
+		"util": "^0.12.5"
+	},
+	"overrides": {
+		"browserify-sign": "4.2.2",
+		"hash-base": "3.0.4",
+		"readable-stream": "3.6.2"
 	}
 }
