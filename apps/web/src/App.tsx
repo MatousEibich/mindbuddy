@@ -2,9 +2,11 @@ import { useState, useRef, useEffect } from "react";
 import { buildMindBuddyChain } from "@mindbuddy/core";
 import type { Profile } from "@mindbuddy/core";
 import "./App.css";
+// Ensure MindBuddy is initialized
+import "./init";
 
-// Import these directly from the modules to avoid the export issue
-import { loadProfile, saveProfile } from "@mindbuddy/core/dist/profile";
+// Import the local profile utilities instead of the core ones
+import { loadProfileFromStorage, saveProfileToStorage } from "./profileUtils";
 
 function Settings({ profile, onSave, onClose }: { 
 	profile: Profile; 
@@ -124,22 +126,30 @@ export default function App() {
 	const [isLoading, setIsLoading] = useState(false);
 	const [profile, setProfile] = useState<Profile | null>(null);
 	const [showSettings, setShowSettings] = useState(false);
-	const chainRef = useRef<Awaited<ReturnType<typeof buildMindBuddyChain>>>();
+	// Use any type to avoid TypeScript issues
+	const chainRef = useRef<any>(null);
 	
 	useEffect(() => {
-		loadProfile().then(async p => {
-			let prof = p;
-			if (!p) {
-				prof = await fetch("/profile.json").then(r => r.json());
-				await saveProfile(prof);
+		const initializeApp = async () => {
+			try {
+				const p = await loadProfileFromStorage();
+				let prof = p;
+				if (!p) {
+					prof = await fetch("/profile.json").then(r => r.json());
+					await saveProfileToStorage(prof);
+				}
+				setProfile(prof);
+				chainRef.current = await buildMindBuddyChain(prof);
+			} catch (error) {
+				console.error("Error initializing app:", error);
 			}
-			setProfile(prof);
-			chainRef.current = await buildMindBuddyChain(prof);
-		});
+		};
+		
+		initializeApp();
 	}, []);
 
 	async function handleSave(p: Profile) {
-		await saveProfile(p);
+		await saveProfileToStorage(p);
 		setProfile(p);
 		// rebuild chain so new style applies
 		chainRef.current = await buildMindBuddyChain(p);
@@ -199,29 +209,29 @@ export default function App() {
 				<textarea
 					className="border rounded w-full p-2"
 					value={text}
-					onChange={(e) => setText(e.target.value)}
-					placeholder="Type here…"
-					onKeyDown={(e) => {
+					onChange={e => setText(e.target.value)}
+					onKeyDown={e => {
 						if (e.key === "Enter" && !e.shiftKey) {
 							e.preventDefault();
 							send();
 						}
 					}}
+					placeholder="Type your message..."
 				/>
 				<button 
 					onClick={send}
 					disabled={isLoading || !text.trim()}
-					className="bg-blue-500 text-white px-4 py-2 rounded disabled:bg-gray-300"
+					className="bg-blue-500 text-white px-4 py-2 rounded disabled:opacity-50"
 				>
 					Send
 				</button>
 			</div>
-
+			
 			{showSettings && (
 				<Settings 
 					profile={profile} 
-					onSave={handleSave} 
-					onClose={() => setShowSettings(false)} 
+					onSave={handleSave}
+					onClose={() => setShowSettings(false)}
 				/>
 			)}
 		</main>
