@@ -7,22 +7,40 @@ import { createLogger } from '../utils/logger';
 const logger = createLogger('LOCALSTORAGE');
 
 /**
+ * Interface for the minimal localStorage functionality we need
+ */
+export interface SimpleStorage {
+  getItem(key: string): string | null;
+  setItem(key: string, value: string): void;
+}
+
+/**
  * Implementation of StorageInterface using browser's localStorage
  * This adapter is for web platforms only
  */
 export class LocalStorageAdapter implements StorageInterface {
-  constructor() {
-    // Check if localStorage is available
+  private storage: SimpleStorage;
+
+  constructor(mockStorage?: SimpleStorage) {
+    // If mockStorage is provided, use it (for testing)
+    if (mockStorage) {
+      this.storage = mockStorage;
+      logger.debug('LocalStorageAdapter initialized with mock storage');
+      return;
+    }
+
+    // Otherwise use the real localStorage
     if (typeof localStorage === 'undefined') {
       throw new Error('localStorage is not available in this environment');
     }
-    logger.debug('LocalStorageAdapter initialized');
+    this.storage = localStorage;
+    logger.debug('LocalStorageAdapter initialized with real localStorage');
   }
 
   async loadLastN(n = STORAGE.DEFAULT_LOAD_COUNT): Promise<Message[]> {
-    logger.debug(`Loading last ${n} messages from localStorage`);
+    logger.debug(`Loading last ${n} messages from storage`);
     try {
-      const raw = localStorage.getItem(STORAGE.MSG_KEY);
+      const raw = this.storage.getItem(STORAGE.MSG_KEY);
       logger.debug("Raw storage data", { raw: raw ? `${raw.substring(0, 50)}...` : null });
       
       const all: Message[] = raw ? JSON.parse(raw) : [];
@@ -41,7 +59,7 @@ export class LocalStorageAdapter implements StorageInterface {
   async saveMessage(m: Message): Promise<void> {
     logger.debug("Saving message", { id: m.id, role: m.role });
     try {
-      const raw = localStorage.getItem(STORAGE.MSG_KEY);
+      const raw = this.storage.getItem(STORAGE.MSG_KEY);
       logger.debug("Existing storage data", { exists: !!raw });
       
       const all: Message[] = raw ? JSON.parse(raw) : [];
@@ -51,7 +69,7 @@ export class LocalStorageAdapter implements StorageInterface {
       const keep = all.slice(-STORAGE.HARD_LIMIT);
       logger.debug("Updated storage", { newCount: keep.length, trimmed: all.length - keep.length });
       
-      localStorage.setItem(STORAGE.MSG_KEY, JSON.stringify(keep));
+      this.storage.setItem(STORAGE.MSG_KEY, JSON.stringify(keep));
       logger.debug("Successfully saved message");
     } catch (error) {
       logger.error("Error saving message", error);
@@ -61,7 +79,7 @@ export class LocalStorageAdapter implements StorageInterface {
   async loadProfile(): Promise<Profile | null> {
     logger.debug("Loading profile");
     try {
-      const raw = localStorage.getItem(STORAGE.PROFILE_KEY);
+      const raw = this.storage.getItem(STORAGE.PROFILE_KEY);
       logger.debug("Raw profile data", { exists: !!raw });
       
       const profile = raw ? JSON.parse(raw) : null;
@@ -77,7 +95,7 @@ export class LocalStorageAdapter implements StorageInterface {
   async saveProfile(p: Profile): Promise<void> {
     logger.debug("Saving profile", { name: p.name });
     try {
-      localStorage.setItem(STORAGE.PROFILE_KEY, JSON.stringify(p));
+      this.storage.setItem(STORAGE.PROFILE_KEY, JSON.stringify(p));
       logger.debug("Successfully saved profile");
     } catch (error) {
       logger.error("Error saving profile", error);

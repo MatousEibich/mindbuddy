@@ -15,6 +15,7 @@ import {
 import type { Profile } from '../../core/src/types';
 // Import the real chain instead of the mobile-friendly mock
 import { buildMindBuddyChain } from '../../core/src/chain';
+import { getDefaultStorage } from '../../core/src/storage';
 
 // Disable specific warnings for development
 LogBox.ignoreLogs(['Require cycle:']);
@@ -46,14 +47,45 @@ const ChatApp = () => {
   const [text, setText] = useState('');
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
-  const [profile] = useState<Profile>(defaultProfile);
+  const [profile, setProfile] = useState<Profile | null>(null);
   const chainRef = useRef<any>(null);
   const flatListRef = useRef<FlatList | null>(null);
 
   // Add a debug state to track chain initialization
   const [chainStatus, setChainStatus] = useState<'initializing' | 'success' | 'error'>('initializing');
 
+  // First useEffect - load profile from storage
   useEffect(() => {
+    const loadProfile = async () => {
+      try {
+        debug("Loading profile from storage");
+        const storage = getDefaultStorage();
+        const storedProfile = await storage.loadProfile();
+        
+        if (storedProfile) {
+          debug("Profile loaded from storage", { name: storedProfile.name });
+          setProfile(storedProfile);
+        } else {
+          debug("No profile found in storage, using default");
+          setProfile(defaultProfile);
+          // Save default profile to storage
+          await storage.saveProfile(defaultProfile);
+        }
+      } catch (error) {
+        debug("Error loading profile", { 
+          error: error instanceof Error ? error.message : String(error) 
+        });
+        setProfile(defaultProfile);
+      }
+    };
+    
+    loadProfile();
+  }, []);
+
+  // Second useEffect - initialize chain when profile is loaded
+  useEffect(() => {
+    if (!profile) return;
+    
     // Initialize real chain
     debug("Creating mind buddy chain", { profileName: profile.name });
     
@@ -84,7 +116,7 @@ const ChatApp = () => {
   }, [profile]);
 
   const sendMessage = async () => {
-    if (!text.trim()) return;
+    if (!text.trim() || !profile) return;
 
     debug("Sending message", { text });
     
@@ -146,6 +178,17 @@ const ChatApp = () => {
       setIsLoading(false);
     }
   };
+
+  // Show loading indicator if profile is not loaded yet
+  if (!profile) {
+    return (
+      <SafeAreaView style={styles.container}>
+        <View style={styles.loadingContainer}>
+          <Text style={styles.loadingText}>Loading profile...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <SafeAreaView style={styles.container}>

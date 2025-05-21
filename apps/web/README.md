@@ -1,54 +1,96 @@
-# React + TypeScript + Vite
+# MindBuddy Web Application
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+The web implementation of MindBuddy, providing a browser-based chat interface.
 
-Currently, two official plugins are available:
+## Overview
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+This is the web application for MindBuddy, built with:
 
-## Expanding the ESLint configuration
+- React 19
+- Vite
+- Local storage for data persistence
+- Tailwind CSS for styling
 
-If you are developing a production application, we recommend updating the configuration to enable type-aware lint rules:
+## Features
 
-```js
-export default tseslint.config({
-  extends: [
-    // Remove ...tseslint.configs.recommended and replace with this
-    ...tseslint.configs.recommendedTypeChecked,
-    // Alternatively, use this for stricter rules
-    ...tseslint.configs.strictTypeChecked,
-    // Optionally, add this for stylistic rules
-    ...tseslint.configs.stylisticTypeChecked,
-  ],
-  languageOptions: {
-    // other options...
-    parserOptions: {
-      project: ['./tsconfig.node.json', './tsconfig.app.json'],
-      tsconfigRootDir: import.meta.dirname,
-    },
-  },
-})
+- Chat interface with an AI companion
+- User profile management
+- Conversation style customization
+- Core fact management
+- Persistent conversation history
+
+## Getting Started
+
+### Prerequisites
+
+- Node.js (v18+)
+- PNPM package manager
+
+### Installation
+
+```bash
+# Install dependencies from the root of the monorepo
+pnpm install
+
+# Build the core package first
+cd packages/core
+pnpm build
+
+# Return to the web app
+cd ../../apps/web
 ```
 
-You can also install [eslint-plugin-react-x](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-x) and [eslint-plugin-react-dom](https://github.com/Rel1cx/eslint-react/tree/main/packages/plugins/eslint-plugin-react-dom) for React-specific lint rules:
+### Running the App
 
-```js
-// eslint.config.js
-import reactX from 'eslint-plugin-react-x'
-import reactDom from 'eslint-plugin-react-dom'
+```bash
+# Development mode
+pnpm dev
 
-export default tseslint.config({
-  plugins: {
-    // Add the react-x and react-dom plugins
-    'react-x': reactX,
-    'react-dom': reactDom,
-  },
-  rules: {
-    // other rules...
-    // Enable its recommended typescript rules
-    ...reactX.configs['recommended-typescript'].rules,
-    ...reactDom.configs.recommended.rules,
-  },
-})
+# Production build
+pnpm build
+
+# Preview production build
+pnpm preview
 ```
+
+## Architecture
+
+The web application:
+
+1. Uses the `@mindbuddy/core` package for business logic
+2. Implements a simple `localStorage`-based persistence layer
+3. Provides a clean, responsive UI for desktop and mobile browsers
+
+### Key Files
+
+- `src/App.tsx`: Main component with chat functionality
+- `src/profileUtils.ts`: Profile management utilities
+- `src/init.ts`: Initialization for storage and other systems
+
+## Configuration
+
+The app is configured through:
+
+- Environment variables (for API keys)
+- The profile interface (for user preferences)
+- The central configuration in `@mindbuddy/core`
+
+## Development
+
+### Adding New Features
+
+1. Understand the existing components and architecture
+2. Make changes to the UI components as needed
+3. If business logic changes are required, make them in the core package
+
+### Testing
+
+Run the app in development mode and test your changes:
+
+```bash
+pnpm dev
+```
+
+## License
+
+ISC License

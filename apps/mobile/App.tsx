@@ -2,6 +2,8 @@
 import "react-native-get-random-values";
 import { OPENAI_API_KEY } from "@env";
 import ChatApp from "@mindbuddy/ui";
+import AsyncStorage from '@react-native-async-storage/async-storage';
+import { AsyncStorageAdapter, setDefaultStorage } from "@mindbuddy/core";
 
 // Debug log function
 const debug = (message: string, data?: any) => {
@@ -15,6 +17,11 @@ debug("API Key status", {
   prefix: OPENAI_API_KEY ? OPENAI_API_KEY.substring(0, 6) : 'none',
   length: OPENAI_API_KEY?.length || 0
 });
+
+// Initialize storage first - this is essential!
+const storage = new AsyncStorageAdapter(AsyncStorage);
+setDefaultStorage(storage);
+debug("AsyncStorage adapter initialized and set as default");
 
 // Set up a global process object for the core package
 // Provide a fallback API key in case the import fails
