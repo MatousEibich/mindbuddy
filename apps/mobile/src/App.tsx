@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
@@ -10,6 +10,7 @@ import {
   ActivityIndicator,
   TouchableOpacity,
   Alert,
+  Button,
 } from 'react-native';
 import { OPENAI_API_KEY } from '@env';
 // Import AsyncStorage
@@ -19,7 +20,7 @@ import { createRealChain } from './utils/chainWrapper';
 import type { Profile } from '@mindbuddy/core';
 // Import storage methods from core
 import { AsyncStorageAdapter } from '@mindbuddy/core/src/storage/AsyncStorageAdapter';
-import { setDefaultStorage, saveMessage, loadLastN } from '@mindbuddy/core/src/storage';
+import { setDefaultStorage, saveMessage, loadLastN, loadProfile } from '@mindbuddy/core/src/storage';
 import type { Message as CoreMessage } from '@mindbuddy/core/src/message';
 import { STORAGE } from '@mindbuddy/core/src/config';
 
@@ -27,8 +28,29 @@ import { STORAGE } from '@mindbuddy/core/src/config';
 import ChatInput from './components/ChatInput';
 import ChatMessage, { Message as AppMessage } from './components/ChatMessage';
 
+// Import React Navigation components
+import { NavigationContainer } from '@react-navigation/native';
+import { createNativeStackNavigator } from '@react-navigation/native-stack';
+import { useFocusEffect } from '@react-navigation/native';
+import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
+
+// Import screens
+import SettingsScreen from './screens/SettingsScreen';
+
 // Import profile from the core package
 import profileData from '@mindbuddy/core/src/profile.json';
+
+// Define stack navigator type
+type RootStackParamList = {
+  Chat: undefined;
+  Settings: undefined;
+};
+
+type ChatScreenProps = {
+  navigation: NativeStackNavigationProp<RootStackParamList, 'Chat'>;
+};
+
+const Stack = createNativeStackNavigator<RootStackParamList>();
 
 // Helper function to clean the API key
 function cleanApiKey(key: string): string {
@@ -77,9 +99,9 @@ let messageIdCounter = 0;
 const generateId = () => `msg_${messageIdCounter++}`;
 
 /**
- * Main App component
+ * Chat Screen Component
  */
-const App = () => {
+const ChatScreen = ({ navigation }: ChatScreenProps) => {
   const [messages, setMessages] = useState<AppMessage[]>([
     {
       id: generateId(),
@@ -91,13 +113,25 @@ const App = () => {
   const [input, setInput] = useState('');
   const [chain, setChain] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [profile, setProfile] = useState<Profile | null>(null);
 
-  // Initialize chain on first load and load previous messages
-  useEffect(() => {
-    try {
-      // Create the real chain implementation
-      const realChain = createRealChain(profile, cleanedApiKey);
-      setChain(realChain);
+  // Reload profile and rebuild chain when screen comes into focus
+  useFocusEffect(
+    useCallback(() => {
+      async function refreshProfile() {
+        try {
+          const loadedProfile = await loadProfile();
+          if (loadedProfile) {
+            setProfile(loadedProfile);
+            const realChain = createRealChain(loadedProfile, cleanedApiKey);
+            setChain(realChain);
+          }
+        } catch (error) {
+          console.error("Failed to refresh profile:", error);
+        }
+      }
+      
+      refreshProfile();
       
       // Load previous messages
       (async () => {
@@ -107,10 +141,8 @@ const App = () => {
           setMessages(appMessages);
         }
       })();
-    } catch (error) {
-      console.error("Initialization failed:", error);
-    }
-  }, []);
+    }, [])
+  );
 
   // Clear chat history
   const clearHistory = () => {
@@ -236,13 +268,22 @@ const App = () => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>MindBuddy</Text>
-        <TouchableOpacity 
-          style={styles.clearButton} 
-          onPress={clearHistory}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.clearButtonText}>Clear History</Text>
-        </TouchableOpacity>
+        <View style={styles.headerButtons}>
+          <TouchableOpacity 
+            style={styles.headerButton} 
+            onPress={() => navigation.navigate('Settings')}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.headerButtonText}>⚙️</Text>
+          </TouchableOpacity>
+          <TouchableOpacity 
+            style={styles.headerButton} 
+            onPress={clearHistory}
+            activeOpacity={0.7}
+          >
+            <Text style={styles.headerButtonText}>Clear</Text>
+          </TouchableOpacity>
+        </View>
       </View>
       
       <KeyboardAvoidingView
@@ -272,6 +313,28 @@ const App = () => {
   );
 };
 
+/**
+ * Main App component with navigation
+ */
+const App = () => {
+  return (
+    <NavigationContainer>
+      <Stack.Navigator>
+        <Stack.Screen
+          name="Chat"
+          component={ChatScreen}
+          options={{ headerShown: false }}
+        />
+        <Stack.Screen
+          name="Settings"
+          component={SettingsScreen}
+          options={{ title: 'Profile Settings' }}
+        />
+      </Stack.Navigator>
+    </NavigationContainer>
+  );
+};
+
 const styles = StyleSheet.create({
   container: {
     flex: 1,
@@ -289,13 +352,18 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
   },
-  clearButton: {
+  headerButtons: {
+    flexDirection: 'row',
+    alignItems: 'center',
+  },
+  headerButton: {
     backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 12,
     paddingVertical: 6,
     borderRadius: 16,
+    marginLeft: 8,
   },
-  clearButtonText: {
+  headerButtonText: {
     color: 'white',
     fontSize: 14,
     fontWeight: '500',
