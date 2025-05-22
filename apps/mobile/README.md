@@ -6,7 +6,8 @@ The mobile implementation of MindBuddy, providing a native chat interface for iO
 
 This is the mobile application for MindBuddy, built with:
 
-- React Native
+- React 19
+- React Native 0.79
 - Expo
 - AsyncStorage for data persistence
 - React Native's styling system
@@ -24,7 +25,7 @@ This is the mobile application for MindBuddy, built with:
 ### Prerequisites
 
 - Node.js (v18+)
-- PNPM package manager
+- PNPM package manager (v10.11.0+)
 - Expo Go app (for development on physical devices)
 - Android Studio / Xcode (for emulators)
 
@@ -66,7 +67,7 @@ The mobile application:
 ### Key Files
 
 - `App.tsx`: Main component and entry point
-- `index.ts`: Application initialization
+- `index.js`: Application initialization
 
 ## Configuration
 

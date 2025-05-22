@@ -65,12 +65,14 @@ The web application (`apps/web`) is built with:
 - Vite
 - Local storage persistence
 - Tailwind CSS for styling
+- Zustand for state management
 
 ### Mobile Application
 
 The mobile application (`apps/mobile`) is built with:
 
-- React Native
+- React Native 0.79
+- React 19
 - Expo
 - AsyncStorage for persistence
 
@@ -79,7 +81,7 @@ The mobile application (`apps/mobile`) is built with:
 ### Prerequisites
 
 - Node.js (v18+)
-- PNPM package manager
+- PNPM package manager (v10.11.0+)
 
 ### Setup
 

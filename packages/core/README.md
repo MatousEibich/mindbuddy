@@ -113,11 +113,11 @@ The package includes tools for testing components:
 # Build the package
 pnpm build
 
-# Run storage tests
-node dist/test-storage.js
+# Run all tests
+pnpm test
 
-# Run example scripts
-node dist/test.js
+# Run storage tests
+pnpm test:storage
 ```
 
 ## Integration
@@ -155,7 +155,10 @@ pnpm build
 
 - `@langchain/core`: LangChain functionality
 - `@langchain/openai`: OpenAI integration
+- `langchain`: Core LangChain library
 - `dotenv`: Environment variable management
+- `uuid`: For generating unique IDs
+- `@react-native-async-storage/async-storage`: AsyncStorage types
 
 ## License
 

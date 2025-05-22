@@ -65,16 +65,14 @@ To add new components to this package:
 
 1. Create the component in the `src` directory
 2. Export it from `src/index.ts`
-3. Build the package
+3. The UI package doesn't require compilation and is directly imported
 
-```bash
-pnpm build
-```
+> Note: Unlike the core package, the UI package doesn't need a build step.
 
 ## Dependencies
 
 - `@mindbuddy/core`: Core functionality
-- React
+- React 19 (provided by the app using this package)
 - Platform-specific UI libraries as needed
 
 ## License

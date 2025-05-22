@@ -10,6 +10,7 @@ This is the web application for MindBuddy, built with:
 - Vite
 - Local storage for data persistence
 - Tailwind CSS for styling
+- Zustand for state management
 
 ## Features
 
@@ -24,7 +25,7 @@ This is the web application for MindBuddy, built with:
 ### Prerequisites
 
 - Node.js (v18+)
-- PNPM package manager
+- PNPM package manager (v10.11.0+)
 
 ### Installation
 
@@ -60,12 +61,14 @@ The web application:
 1. Uses the `@mindbuddy/core` package for business logic
 2. Implements a simple `localStorage`-based persistence layer
 3. Provides a clean, responsive UI for desktop and mobile browsers
+4. Uses Zustand for state management
 
 ### Key Files
 
 - `src/App.tsx`: Main component with chat functionality
 - `src/profileUtils.ts`: Profile management utilities
 - `src/init.ts`: Initialization for storage and other systems
+- `src/store.ts`: Zustand store setup
 
 ## Configuration
 
