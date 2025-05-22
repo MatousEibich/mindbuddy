@@ -9,53 +9,165 @@ import {
   ScrollView,
   Platform,
   KeyboardAvoidingView,
+  ActivityIndicator,
 } from 'react-native';
 import { OPENAI_API_KEY } from '@env';
+// Import our real chain implementation
+import { createRealChain } from './chainWrapper';
+// Keep the mock chain as a fallback
+import { buildMobileFriendlyChain } from '@mindbuddy/ui/src/mock-mobile-chain';
+import type { Profile } from '@mindbuddy/core';
+
+// Helper function to clean the API key
+function cleanApiKey(key: string): string {
+  if (!key) return '';
+  return key
+    .replace(/\r?\n/g, '') // Remove line breaks
+    .replace(/\s/g, '')    // Remove any whitespace
+    .trim();               // Final trim just in case
+}
 
 // Configure global process.env shim for compatibility with the core package
+// Use the cleaned API key
+const cleanedApiKey = cleanApiKey(OPENAI_API_KEY);
 globalThis.process = {
   env: {
-    OPENAI_API_KEY,
+    OPENAI_API_KEY: cleanedApiKey,
   },
 } as any;
+
+// Hardcoded profile as specified
+const profile: Profile = {
+  name: "Matouš",
+  pronouns: "he/him",
+  style: "neil",
+  core_facts: [
+    { id: 1, text: "I'm currently doing a mesocycle with calisthenics." },
+    { id: 2, text: "I've got a dog named Rosie, she's the best." }
+  ]
+};
+
+// Simple ID generator
+let messageIdCounter = 0;
+const generateId = () => `msg_${messageIdCounter++}`;
+
+// Message type definition
+interface Message {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  timestamp: number;
+}
 
 /**
  * Main App component
  */
 const App = () => {
-  const [messages, setMessages] = useState<{text: string, isUser: boolean}[]>([
-    {text: 'Welcome to MindBuddy! How can I help you today?', isUser: false}
+  const [messages, setMessages] = useState<Message[]>([
+    {
+      id: generateId(),
+      role: 'assistant',
+      content: 'Welcome to MindBuddy! How can I help you today?',
+      timestamp: Date.now(),
+    }
   ]);
   const [input, setInput] = useState('');
+  const [chain, setChain] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(false);
 
   // Optional: Add validation and warning for API key
   useEffect(() => {
-    if (!OPENAI_API_KEY || !OPENAI_API_KEY.startsWith("sk-")) {
+    if (!cleanedApiKey || !cleanedApiKey.startsWith("sk-")) {
       console.warn("Missing or invalid OpenAI key.");
       // Optionally show UI alert
     } else {
-      console.log("OpenAI API key loaded successfully:", OPENAI_API_KEY.substring(0, 5) + '...');
+      console.log("OpenAI API key loaded successfully:", cleanedApiKey.substring(0, 5) + '...');
       console.log("process.env.OPENAI_API_KEY:", process.env.OPENAI_API_KEY?.substring(0, 5) + '...');
     }
   }, []);
 
-  // Simple function to add messages
-  const handleSend = () => {
+  // Initialize chain on first load
+  useEffect(() => {
+    try {
+      console.log("Initializing real OpenAI chain...");
+      
+      // Always use our real chain implementation with confirmed working key
+      const realChain = createRealChain(profile, cleanedApiKey);
+      console.log("✅ Real OpenAI chain initialized");
+      setChain(realChain);
+    } catch (error) {
+      console.error("❌ Chain initialization failed:", error);
+      
+      // Fallback to mock chain if real one fails
+      console.log("Falling back to mock chain");
+      const mockChain = buildMobileFriendlyChain(profile);
+      setChain(mockChain);
+    }
+  }, []);
+
+  // Handle sending a message
+  const handleSend = async () => {
     if (!input.trim()) return;
     
-    // Add user message
-    setMessages([...messages, {text: input, isUser: true}]);
+    // Create user message
+    const userMessage: Message = {
+      id: generateId(),
+      role: 'user',
+      content: input,
+      timestamp: Date.now(),
+    };
+    
+    // Add user message to chat
+    setMessages(prev => [...prev, userMessage]);
     
     // Clear input
     setInput('');
-
-    // Simulate AI response (for testing only)
-    setTimeout(() => {
-      setMessages(prev => [...prev, {
-        text: `You said: "${input}"`,
-        isUser: false
-      }]);
-    }, 1000);
+    
+    // Check if chain is available
+    if (!chain) {
+      console.warn("Chain not initialized yet");
+      const errorMessage: Message = {
+        id: generateId(),
+        role: 'assistant',
+        content: "I'm still getting ready. Please try again in a moment.",
+        timestamp: Date.now(),
+      };
+      setMessages(prev => [...prev, errorMessage]);
+      return;
+    }
+    
+    // Set loading state
+    setIsLoading(true);
+    
+    try {
+      // Call the LLM chain
+      const result = await chain.invoke({ query: userMessage.content });
+      
+      // Create bot message from response
+      const botMessage: Message = {
+        id: generateId(),
+        role: 'assistant',
+        content: result.text ?? result.content ?? "",
+        timestamp: Date.now(),
+      };
+      
+      // Add bot message to chat
+      setMessages(prev => [...prev, botMessage]);
+    } catch (err) {
+      console.warn("LLM call failed", err);
+      
+      // Add error message
+      const errorMessage: Message = {
+        id: generateId(),
+        role: 'assistant',
+        content: "Oops, something went wrong. Try again?",
+        timestamp: Date.now(),
+      };
+      
+      setMessages(prev => [...prev, errorMessage]);
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
@@ -69,17 +181,28 @@ const App = () => {
         style={styles.messageContainer}
       >
         <ScrollView style={styles.messageList}>
-          {messages.map((msg, idx) => (
+          {messages.map((msg) => (
             <View 
-              key={idx} 
+              key={msg.id} 
               style={[
                 styles.messageBubble,
-                msg.isUser ? styles.userBubble : styles.aiBubble
+                msg.role === 'user' ? styles.userBubble : styles.aiBubble
               ]}
             >
-              <Text style={styles.messageText}>{msg.text}</Text>
+              <Text style={[
+                styles.messageText,
+                msg.role === 'user' ? styles.userText : styles.aiText
+              ]}>
+                {msg.content}
+              </Text>
             </View>
           ))}
+          
+          {isLoading && (
+            <View style={styles.loadingContainer}>
+              <ActivityIndicator size="small" color="#4a69bd" />
+            </View>
+          )}
         </ScrollView>
         
         <View style={styles.inputContainer}>
@@ -90,8 +213,13 @@ const App = () => {
             placeholder="Type a message..."
             placeholderTextColor="#999"
             multiline
+            editable={!isLoading}
           />
-          <TouchableOpacity style={styles.sendButton} onPress={handleSend}>
+          <TouchableOpacity 
+            style={[styles.sendButton, isLoading && styles.disabledButton]} 
+            onPress={handleSend}
+            disabled={isLoading || !input.trim()}
+          >
             <Text style={styles.sendButtonText}>Send</Text>
           </TouchableOpacity>
         </View>
@@ -138,6 +266,11 @@ const styles = StyleSheet.create({
   },
   messageText: {
     fontSize: 16,
+  },
+  userText: {
+    color: 'white',
+  },
+  aiText: {
     color: '#333',
   },
   inputContainer: {
@@ -165,9 +298,16 @@ const styles = StyleSheet.create({
     justifyContent: 'center',
     alignItems: 'center',
   },
+  disabledButton: {
+    backgroundColor: '#ccc',
+  },
   sendButtonText: {
     color: 'white',
     fontWeight: 'bold',
+  },
+  loadingContainer: {
+    padding: 10,
+    alignItems: 'center',
   },
 });
 
