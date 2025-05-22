@@ -2,7 +2,7 @@ import type { Profile } from '@mindbuddy/core';
 import { MINDBUDDY_TEMPLATE, STYLE_INSTRUCTIONS } from '@mindbuddy/core/src/prompt';
 import { stringifyHistory } from '@mindbuddy/core/src/renderPrompt';
 import { CRISIS_HANDOFF } from '@mindbuddy/core/src/types';
-import type { Message, Role } from '@mindbuddy/core/src/message';
+import type { Message } from '@mindbuddy/core/src/message';
 
 /**
  * A lightweight chain implementation that directly calls OpenAI API
@@ -11,30 +11,14 @@ import type { Message, Role } from '@mindbuddy/core/src/message';
 export function createRealChain(profile: Profile, apiKey: string) {
   // Validate the API key
   if (!apiKey || !apiKey.startsWith('sk-')) {
-    console.error('Invalid API key format');
     throw new Error('Invalid API key format');
   }
   
-  // Log the current profile style for debugging
-  console.log(`[chainWrapper] Profile style: ${profile.style}`);
-  console.log(`[chainWrapper] Style instructions being used: ${STYLE_INSTRUCTIONS[profile.style].substring(0, 50)}...`);
-  
-  // Fix API key format issues
-  // The key from .env may have line breaks or extra characters
+  // Fix API key format issues that might come from .env
   const cleanApiKey = apiKey
     .replace(/\r?\n/g, '') // Remove line breaks
     .replace(/\s/g, '')    // Remove any whitespace
     .trim();               // Final trim just in case
-  
-  // Check for specific key issue found with compareKeys.js
-  // Our key has 'qqyYEX' at position 92 instead of 'yYEXC'
-  const workingKey = "";
-  
-  // Use the known working key if there's a length mismatch
-  const finalApiKey = cleanApiKey.length === 164 ? cleanApiKey : workingKey;
-  
-  console.log(`API key from .env length: ${cleanApiKey.length}`);
-  console.log(`Using API key with correct length (${finalApiKey.length})`);
   
   // Store chat history
   let chatMessages: Message[] = [];
@@ -46,8 +30,6 @@ export function createRealChain(profile: Profile, apiKey: string) {
   return {
     invoke: async ({ query }: { query: string }) => {
       try {
-        console.log("Making real OpenAI API call");
-        
         // Add user message to history
         const userMessage: Message = {
           id: generateId(),
@@ -60,10 +42,6 @@ export function createRealChain(profile: Profile, apiKey: string) {
         // Convert the chat history to a string
         const chatHistory = stringifyHistory(chatMessages, profile);
         
-        // Log the style and instructions again in case profile was modified
-        console.log(`[chainWrapper:invoke] Current style: ${profile.style}`);
-        console.log(`[chainWrapper:invoke] Using style instructions: ${STYLE_INSTRUCTIONS[profile.style].substring(0, 50)}...`);
-        
         // Create a system prompt manually based on the MINDBUDDY_TEMPLATE
         const systemPrompt = MINDBUDDY_TEMPLATE
           .replace("{name}", profile.name)
@@ -73,17 +51,13 @@ export function createRealChain(profile: Profile, apiKey: string) {
           .replace("{chat_history}", chatHistory)
           .replace("{query_str}", query)
           .replace("{CRISIS_HANDOFF}", CRISIS_HANDOFF);
-          
-        // Log part of the system prompt to verify style instructions are included
-        console.log(`[chainWrapper:invoke] System prompt excerpt: ${systemPrompt.substring(0, 200)}...`);
-        console.log(`[chainWrapper:invoke] Style instructions in prompt: ${systemPrompt.includes(STYLE_INSTRUCTIONS[profile.style])}`);
         
         // Make a direct fetch call to OpenAI API
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${finalApiKey}`
+            'Authorization': `Bearer ${cleanApiKey}`
           },
           body: JSON.stringify({
             model: 'gpt-4o',
@@ -97,7 +71,6 @@ export function createRealChain(profile: Profile, apiKey: string) {
         
         if (!response.ok) {
           const errorData = await response.json();
-          console.error("OpenAI API error:", errorData);
           throw new Error(`OpenAI API error: ${response.status}`);
         }
         
@@ -113,13 +86,8 @@ export function createRealChain(profile: Profile, apiKey: string) {
         };
         chatMessages.push(assistantMessage);
         
-        console.log("OpenAI response received", { 
-          preview: content.substring(0, 50) + '...' 
-        });
-        
         return { text: content };
       } catch (error) {
-        console.error("Error calling OpenAI API:", error);
         throw error;
       }
     }

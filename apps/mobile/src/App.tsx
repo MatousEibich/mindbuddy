@@ -4,8 +4,6 @@ import {
   StyleSheet,
   Text,
   View,
-  TextInput,
-  TouchableOpacity,
   ScrollView,
   Platform,
   KeyboardAvoidingView,
@@ -13,8 +11,12 @@ import {
 } from 'react-native';
 import { OPENAI_API_KEY } from '@env';
 // Import our real chain implementation
-import { createRealChain } from './chainWrapper';
+import { createRealChain } from './utils/chainWrapper';
 import type { Profile } from '@mindbuddy/core';
+
+// Import components
+import ChatInput from './components/ChatInput';
+import ChatMessage, { Message } from './components/ChatMessage';
 
 // Import profile from the core package
 import profileData from '@mindbuddy/core/src/profile.json';
@@ -29,7 +31,6 @@ function cleanApiKey(key: string): string {
 }
 
 // Configure global process.env shim for compatibility with the core package
-// Use the cleaned API key
 const cleanedApiKey = cleanApiKey(OPENAI_API_KEY);
 globalThis.process = {
   env: {
@@ -43,21 +44,9 @@ const profile: Profile = {
   style: profileData.style as "mom" | "middle" | "neil"
 };
 
-// Log profile data for verification
-console.log(`[App] Loaded profile: Name=${profile.name}, Style=${profile.style}`);
-console.log(`[App] Core facts count: ${profile.core_facts.length}`);
-
 // Simple ID generator
 let messageIdCounter = 0;
 const generateId = () => `msg_${messageIdCounter++}`;
-
-// Message type definition
-interface Message {
-  id: string;
-  role: 'user' | 'assistant';
-  content: string;
-  timestamp: number;
-}
 
 /**
  * Main App component
@@ -75,29 +64,14 @@ const App = () => {
   const [chain, setChain] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  // Optional: Add validation and warning for API key
-  useEffect(() => {
-    if (!cleanedApiKey || !cleanedApiKey.startsWith("sk-")) {
-      console.warn("Missing or invalid OpenAI key.");
-      // Optionally show UI alert
-    } else {
-      console.log("OpenAI API key loaded successfully:", cleanedApiKey.substring(0, 5) + '...');
-      console.log("process.env.OPENAI_API_KEY:", process.env.OPENAI_API_KEY?.substring(0, 5) + '...');
-    }
-  }, []);
-
   // Initialize chain on first load
   useEffect(() => {
     try {
-      console.log("Initializing OpenAI chain...");
-      
       // Create the real chain implementation
       const realChain = createRealChain(profile, cleanedApiKey);
-      console.log("✅ OpenAI chain initialized");
       setChain(realChain);
     } catch (error) {
-      console.error("❌ Chain initialization failed:", error);
-      // No fallback now, just show an error message in the UI when sending a message
+      console.error("Chain initialization failed:", error);
     }
   }, []);
 
@@ -121,7 +95,6 @@ const App = () => {
     
     // Check if chain is available
     if (!chain) {
-      console.warn("Chain not initialized yet");
       const errorMessage: Message = {
         id: generateId(),
         role: 'assistant',
@@ -150,7 +123,7 @@ const App = () => {
       // Add bot message to chat
       setMessages(prev => [...prev, botMessage]);
     } catch (err) {
-      console.warn("LLM call failed", err);
+      console.error("LLM call failed", err);
       
       // Add error message
       const errorMessage: Message = {
@@ -178,20 +151,7 @@ const App = () => {
       >
         <ScrollView style={styles.messageList}>
           {messages.map((msg) => (
-            <View 
-              key={msg.id} 
-              style={[
-                styles.messageBubble,
-                msg.role === 'user' ? styles.userBubble : styles.aiBubble
-              ]}
-            >
-              <Text style={[
-                styles.messageText,
-                msg.role === 'user' ? styles.userText : styles.aiText
-              ]}>
-                {msg.content}
-              </Text>
-            </View>
+            <ChatMessage key={msg.id} message={msg} />
           ))}
           
           {isLoading && (
@@ -201,24 +161,12 @@ const App = () => {
           )}
         </ScrollView>
         
-        <View style={styles.inputContainer}>
-          <TextInput
-            style={styles.input}
-            value={input}
-            onChangeText={setInput}
-            placeholder="Type a message..."
-            placeholderTextColor="#999"
-            multiline
-            editable={!isLoading}
-          />
-          <TouchableOpacity 
-            style={[styles.sendButton, isLoading && styles.disabledButton]} 
-            onPress={handleSend}
-            disabled={isLoading || !input.trim()}
-          >
-            <Text style={styles.sendButtonText}>Send</Text>
-          </TouchableOpacity>
-        </View>
+        <ChatInput
+          value={input}
+          onChangeText={setInput}
+          onSend={handleSend}
+          isLoading={isLoading}
+        />
       </KeyboardAvoidingView>
     </SafeAreaView>
   );
@@ -246,65 +194,10 @@ const styles = StyleSheet.create({
     flex: 1,
     padding: 16,
   },
-  messageBubble: {
-    borderRadius: 20,
-    padding: 12,
-    marginBottom: 8,
-    maxWidth: '80%',
-  },
-  userBubble: {
-    backgroundColor: '#4a69bd',
-    alignSelf: 'flex-end',
-  },
-  aiBubble: {
-    backgroundColor: '#e9e9e9',
-    alignSelf: 'flex-start',
-  },
-  messageText: {
-    fontSize: 16,
-  },
-  userText: {
-    color: 'white',
-  },
-  aiText: {
-    color: '#333',
-  },
-  inputContainer: {
-    flexDirection: 'row',
-    padding: 8,
-    backgroundColor: 'white',
-    borderTopWidth: 1,
-    borderTopColor: '#e0e0e0',
-  },
-  input: {
-    flex: 1,
-    borderWidth: 1,
-    borderColor: '#e0e0e0',
-    borderRadius: 20,
-    padding: 10,
-    maxHeight: 100,
-    fontSize: 16,
-  },
-  sendButton: {
-    marginLeft: 8,
-    backgroundColor: '#4a69bd',
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
-    justifyContent: 'center',
-    alignItems: 'center',
-  },
-  disabledButton: {
-    backgroundColor: '#ccc',
-  },
-  sendButtonText: {
-    color: 'white',
-    fontWeight: 'bold',
-  },
   loadingContainer: {
-    padding: 10,
+    paddingVertical: 10,
     alignItems: 'center',
   },
 });
 
-export default App;
+export default App; 

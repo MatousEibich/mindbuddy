@@ -1,7 +1,7 @@
 // Simple test script to verify core functionality
-import { createLogger } from "./utils/logger";
-import { STORAGE } from "./config";
-import { Profile } from "./types";
+import { createLogger } from "../src/utils/logger";
+import { STORAGE } from "../src/config";
+import { Profile } from "../src/types";
 
 const logger = createLogger('TEST');
 
@@ -25,4 +25,4 @@ logger.info(`Profile style: ${profile.style}`);
 
 logger.info("Test completed successfully!");
 
-// This will be compiled as part of the core package build 
+// Run this with: npx ts-node tests/test.ts 

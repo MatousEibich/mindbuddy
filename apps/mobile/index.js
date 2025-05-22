@@ -54,7 +54,7 @@ if (!Array.prototype.reduce || global.__patchReduce) {
 try {
   debug('APP', 'Registering React component');
   const { AppRegistry } = require('react-native');
-  const App = require('./App').default;
+  const { App } = require('./src');
   
   // Important: The component name MUST be 'main' for Expo
   AppRegistry.registerComponent('main', () => App);

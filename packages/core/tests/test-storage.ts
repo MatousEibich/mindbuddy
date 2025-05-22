@@ -1,13 +1,13 @@
 // Test script to verify the storage system
-import { createLogger } from "./utils/logger";
-import { Profile } from "./types";
-import { StorageInterface } from "./storage/StorageInterface";
-import { LocalStorageAdapter, SimpleStorage } from "./storage/LocalStorageAdapter";
-import { StorageMemory } from "./memory/StorageMemory";
-import { setDefaultStorage } from "./storage/index";
+import { createLogger } from "../src/utils/logger";
+import { Profile } from "../src/types";
+import { StorageInterface } from "../src/storage/StorageInterface";
+import { LocalStorageAdapter, SimpleStorage } from "../src/storage/LocalStorageAdapter";
+import { StorageMemory } from "../src/memory/StorageMemory";
+import { setDefaultStorage } from "../src/storage/index";
 import { v4 as uuid } from "uuid";
-import { Message } from "./message";
-import { DEBUG } from "./config";
+import { Message } from "../src/message";
+import { DEBUG } from "../src/config";
 
 // Force enable debug logging
 DEBUG.ENABLED = true;

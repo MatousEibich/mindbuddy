@@ -5,7 +5,9 @@
 	"main": "dist/index.js",
 	"types": "dist/index.d.ts",
 	"scripts": {
-		"build": "tsc -p tsconfig.json"
+		"build": "tsc -p tsconfig.json",
+		"test": "ts-node tests/test.ts",
+		"test:storage": "ts-node tests/test-storage.ts"
 	},
 	"keywords": [],
 	"author": "",
