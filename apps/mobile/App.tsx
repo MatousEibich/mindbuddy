@@ -14,9 +14,10 @@ import {
 import { OPENAI_API_KEY } from '@env';
 // Import our real chain implementation
 import { createRealChain } from './chainWrapper';
-// Keep the mock chain as a fallback
-import { buildMobileFriendlyChain } from '@mindbuddy/ui/src/mock-mobile-chain';
 import type { Profile } from '@mindbuddy/core';
+
+// Import profile from the core package
+import profileData from '@mindbuddy/core/src/profile.json';
 
 // Helper function to clean the API key
 function cleanApiKey(key: string): string {
@@ -36,16 +37,15 @@ globalThis.process = {
   },
 } as any;
 
-// Hardcoded profile as specified
+// Use the imported profile data
 const profile: Profile = {
-  name: "Matouš",
-  pronouns: "he/him",
-  style: "neil",
-  core_facts: [
-    { id: 1, text: "I'm currently doing a mesocycle with calisthenics." },
-    { id: 2, text: "I've got a dog named Rosie, she's the best." }
-  ]
+  ...profileData,
+  style: profileData.style as "mom" | "middle" | "neil"
 };
+
+// Log profile data for verification
+console.log(`[App] Loaded profile: Name=${profile.name}, Style=${profile.style}`);
+console.log(`[App] Core facts count: ${profile.core_facts.length}`);
 
 // Simple ID generator
 let messageIdCounter = 0;
@@ -89,19 +89,15 @@ const App = () => {
   // Initialize chain on first load
   useEffect(() => {
     try {
-      console.log("Initializing real OpenAI chain...");
+      console.log("Initializing OpenAI chain...");
       
-      // Always use our real chain implementation with confirmed working key
+      // Create the real chain implementation
       const realChain = createRealChain(profile, cleanedApiKey);
-      console.log("✅ Real OpenAI chain initialized");
+      console.log("✅ OpenAI chain initialized");
       setChain(realChain);
     } catch (error) {
       console.error("❌ Chain initialization failed:", error);
-      
-      // Fallback to mock chain if real one fails
-      console.log("Falling back to mock chain");
-      const mockChain = buildMobileFriendlyChain(profile);
-      setChain(mockChain);
+      // No fallback now, just show an error message in the UI when sending a message
     }
   }, []);
 
