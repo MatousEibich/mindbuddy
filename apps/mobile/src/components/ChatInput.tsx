@@ -14,23 +14,25 @@ const ChatInput: React.FC<ChatInputProps> = ({
   onSend, 
   isLoading 
 }) => {
+  const isDisabled = isLoading || !value.trim();
+  
   return (
     <View style={styles.inputContainer}>
       <TextInput
         style={styles.input}
         value={value}
         onChangeText={onChangeText}
-        placeholder="Type a message..."
+        placeholder="Type a message…"
         placeholderTextColor="#999"
         multiline
         editable={!isLoading}
       />
       <TouchableOpacity 
-        style={[styles.sendButton, isLoading && styles.disabledButton]} 
+        style={[styles.sendButton, isDisabled && styles.disabledButton]} 
         onPress={onSend}
-        disabled={isLoading || !value.trim()}
+        disabled={isDisabled}
       >
-        <Text style={styles.sendButtonText}>Send</Text>
+        <Text style={styles.sendButtonText}>➤</Text>
       </TouchableOpacity>
     </View>
   );
@@ -39,34 +41,39 @@ const ChatInput: React.FC<ChatInputProps> = ({
 const styles = StyleSheet.create({
   inputContainer: {
     flexDirection: 'row',
-    padding: 10,
-    borderTopWidth: 1,
-    borderTopColor: '#ddd',
-    backgroundColor: 'white',
+    height: 52,
+    paddingHorizontal: 8,
+    paddingVertical: 8,
+    borderTopWidth: StyleSheet.hairlineWidth,
+    borderTopColor: '#E5E7EB',
+    backgroundColor: '#FFFFFF',
+    alignItems: 'center',
   },
   input: {
     flex: 1,
-    borderWidth: 1,
-    borderColor: '#ddd',
-    borderRadius: 20,
+    backgroundColor: '#E5E7EB',
+    borderRadius: 24,
     paddingHorizontal: 16,
-    paddingVertical: 8,
-    backgroundColor: 'white',
+    minHeight: 36,
     maxHeight: 100,
+    fontSize: 16,
+    color: '#000000',
   },
   sendButton: {
-    marginLeft: 10,
-    backgroundColor: '#4a69bd',
-    borderRadius: 20,
-    paddingHorizontal: 20,
-    paddingVertical: 10,
+    width: 36,
+    height: 36,
+    backgroundColor: '#000000',
+    borderRadius: 24,
+    marginLeft: 8,
+    alignItems: 'center',
     justifyContent: 'center',
   },
   disabledButton: {
-    opacity: 0.5,
+    opacity: 0.3,
   },
   sendButtonText: {
-    color: 'white',
+    color: '#FFFFFF',
+    fontSize: 18,
     fontWeight: 'bold',
   },
 });

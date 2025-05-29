@@ -1,16 +1,15 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import {
   SafeAreaView,
   StyleSheet,
   Text,
   View,
-  ScrollView,
+  FlatList,
   Platform,
   KeyboardAvoidingView,
   ActivityIndicator,
   TouchableOpacity,
   Alert,
-  Button,
 } from 'react-native';
 import { OPENAI_API_KEY } from '@env';
 // Import AsyncStorage
@@ -113,6 +112,16 @@ const ChatScreen = ({ navigation, route }: ChatScreenProps) => {
   const [chain, setChain] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
+  const flatListRef = useRef<FlatList>(null);
+
+  // Auto-scroll to end when messages change
+  useEffect(() => {
+    if (flatListRef.current && messages.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToEnd({ animated: true });
+      }, 100);
+    }
+  }, [messages]);
 
   // Reload profile and rebuild chain when screen comes into focus or threadId changes
   useFocusEffect(
@@ -160,41 +169,6 @@ const ChatScreen = ({ navigation, route }: ChatScreenProps) => {
       })();
     }, [threadId, threadName])
   );
-
-  // Clear current thread history
-  const clearHistory = () => {
-    Alert.alert(
-      "Clear Thread History",
-      `Are you sure you want to clear the history for "${threadName}"? This cannot be undone.`,
-      [
-        {
-          text: "Cancel",
-          style: "cancel"
-        },
-        {
-          text: "Clear",
-          style: "destructive",
-          onPress: async () => {
-            try {
-              // Clear thread messages by setting empty array
-              await AsyncStorage.setItem(`mindbuddy.thread.${threadId}`, JSON.stringify([]));
-              
-              // Reset UI state
-              setMessages([{
-                id: generateId(),
-                role: 'assistant',
-                content: `Thread history cleared. How can I help you today?`,
-                timestamp: Date.now(),
-              }]);
-            } catch (error) {
-              console.error("Failed to clear thread history:", error);
-              Alert.alert("Error", "Failed to clear thread history. Please try again.");
-            }
-          }
-        }
-      ]
-    );
-  };
 
   // Handle sending a message
   const handleSend = async () => {
@@ -261,53 +235,74 @@ const ChatScreen = ({ navigation, route }: ChatScreenProps) => {
     }
   };
 
+  // Render function for FlatList items
+  const renderMessage = ({ item }: { item: AppMessage }) => (
+    <ChatMessage message={item} />
+  );
+
+  // Add loading indicator as a message item
+  const messageData = [...messages];
+  if (isLoading) {
+    messageData.push({
+      id: 'loading',
+      role: 'assistant' as const,
+      content: '',
+      timestamp: Date.now(),
+    });
+  }
+
   return (
     <SafeAreaView style={styles.container}>
-      <View style={styles.header}>
+      {/* TopBar */}
+      <View style={styles.topBar}>
         <TouchableOpacity 
-          style={styles.backButton} 
-          onPress={() => navigation.goBack()}
+          style={styles.hamburgerButton}
+          onPress={() => navigation.navigate('Threads')}
           activeOpacity={0.7}
         >
-          <Text style={styles.backButtonText}>‹ Back</Text>
+          <Text style={styles.hamburgerText}>☰</Text>
         </TouchableOpacity>
-        <Text style={styles.headerText} numberOfLines={1}>
-          {threadName}
-        </Text>
-        <View style={styles.headerButtons}>
-          <TouchableOpacity 
-            style={styles.headerButton} 
-            onPress={() => navigation.navigate('Settings')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.headerButtonText}>⚙️</Text>
-          </TouchableOpacity>
-          <TouchableOpacity 
-            style={styles.headerButton} 
-            onPress={clearHistory}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.headerButtonText}>Clear</Text>
-          </TouchableOpacity>
+        
+        <View style={styles.titleContainer}>
+          <Text style={styles.titleText} numberOfLines={1}>
+            {threadName || 'MindBuddy'}
+          </Text>
         </View>
+        
+        <TouchableOpacity 
+          style={styles.settingsButton}
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.settingsText}>⚙︎</Text>
+        </TouchableOpacity>
       </View>
       
       <KeyboardAvoidingView
         behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
-        style={styles.messageContainer}
+        style={styles.chatContainer}
       >
-        <ScrollView style={styles.messageList}>
-          {messages.map((msg) => (
-            <ChatMessage key={msg.id} message={msg} />
-          ))}
-          
-          {isLoading && (
-            <View style={styles.loadingContainer}>
-              <ActivityIndicator size="small" color="#4a69bd" />
-            </View>
-          )}
-        </ScrollView>
+        {/* MessageList (FlatList) */}
+        <FlatList
+          ref={flatListRef}
+          style={styles.messageList}
+          data={messageData}
+          renderItem={({ item }) => {
+            if (item.id === 'loading') {
+              return (
+                <View style={styles.loadingContainer}>
+                  <ActivityIndicator size="small" color="#000" />
+                </View>
+              );
+            }
+            return <ChatMessage message={item} />;
+          }}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.messageListContent}
+          removeClippedSubviews={false}
+        />
         
+        {/* InputDock */}
         <ChatInput
           value={input}
           onChangeText={setInput}
@@ -349,57 +344,59 @@ const App = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFFFFF',
   },
-  header: {
-    backgroundColor: '#4a69bd',
-    padding: 16,
+  // TopBar styles
+  topBar: {
+    height: 48,
+    backgroundColor: '#FFFFFF',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
     flexDirection: 'row',
     alignItems: 'center',
-    justifyContent: 'space-between',
-  },
-  backButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
     paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginRight: 12,
   },
-  backButtonText: {
-    color: 'white',
+  hamburgerButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  hamburgerText: {
+    fontSize: 24,
+    color: '#000000',
+  },
+  titleContainer: {
+    flex: 1,
+    alignItems: 'center',
+    paddingHorizontal: 12,
+  },
+  titleText: {
     fontSize: 16,
     fontWeight: '600',
-  },
-  headerText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-    flex: 1,
+    color: '#000000',
     textAlign: 'center',
-    marginHorizontal: 12,
   },
-  headerButtons: {
-    flexDirection: 'row',
+  settingsButton: {
+    width: 32,
+    height: 32,
     alignItems: 'center',
+    justifyContent: 'center',
   },
-  headerButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-    marginLeft: 8,
+  settingsText: {
+    fontSize: 24,
+    color: '#000000',
   },
-  headerButtonText: {
-    color: 'white',
-    fontSize: 14,
-    fontWeight: '500',
-  },
-  messageContainer: {
+  // Chat container and message list
+  chatContainer: {
     flex: 1,
   },
   messageList: {
     flex: 1,
+  },
+  messageListContent: {
     padding: 16,
+    paddingBottom: 8,
   },
   loadingContainer: {
     paddingVertical: 10,

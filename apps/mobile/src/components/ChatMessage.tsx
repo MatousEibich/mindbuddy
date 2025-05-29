@@ -17,12 +17,12 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
     <View 
       style={[
         styles.messageBubble,
-        message.role === 'user' ? styles.userBubble : styles.aiBubble
+        message.role === 'user' ? styles.userBubble : styles.assistantBubble
       ]}
     >
       <Text style={[
         styles.messageText,
-        message.role === 'user' ? styles.userText : styles.aiText
+        message.role === 'user' ? styles.userText : styles.assistantText
       ]}>
         {message.content}
       </Text>
@@ -32,27 +32,33 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
 
 const styles = StyleSheet.create({
   messageBubble: {
-    borderRadius: 20,
+    borderRadius: 24,
     padding: 12,
-    marginBottom: 10,
+    marginVertical: 6,
     maxWidth: '80%',
+    // Shadow for iOS
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    // Elevation for Android
+    elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#4a69bd',
+    backgroundColor: '#000000',
     alignSelf: 'flex-end',
   },
-  aiBubble: {
-    backgroundColor: '#f2f2f2',
+  assistantBubble: {
+    backgroundColor: '#F3F4F6',
     alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 16,
   },
   userText: {
-    color: 'white',
+    color: '#FFFFFF',
   },
-  aiText: {
-    color: '#333',
+  assistantText: {
+    color: '#000000',
   },
 });
 

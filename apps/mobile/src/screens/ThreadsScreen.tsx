@@ -268,9 +268,6 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
           {formatRelativeTime(item.created)}
         </Text>
       </View>
-      <View style={styles.threadArrow}>
-        <Text style={styles.arrowText}>›</Text>
-      </View>
     </TouchableOpacity>
   );
 
@@ -278,14 +275,7 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
     return (
       <SafeAreaView style={styles.container}>
         <View style={styles.header}>
-          <Text style={styles.headerText}>Conversations</Text>
-          <TouchableOpacity 
-            style={styles.settingsButton} 
-            onPress={() => navigation.navigate('Settings')}
-            activeOpacity={0.7}
-          >
-            <Text style={styles.settingsButtonText}>⚙️</Text>
-          </TouchableOpacity>
+          <Text style={styles.headerText}>Threads</Text>
         </View>
         <View style={styles.loadingContainer}>
           <Text style={styles.loadingText}>Loading conversations...</Text>
@@ -297,14 +287,7 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>Conversations</Text>
-        <TouchableOpacity 
-          style={styles.settingsButton} 
-          onPress={() => navigation.navigate('Settings')}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.settingsButtonText}>⚙️</Text>
-        </TouchableOpacity>
+        <Text style={styles.headerText}>Threads</Text>
       </View>
 
       <FlatList
@@ -333,7 +316,7 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
         onPress={handleCreateThread}
         activeOpacity={0.8}
       >
-        <Text style={styles.fabText}>+</Text>
+        <Text style={styles.fabText}>＋</Text>
       </TouchableOpacity>
     </SafeAreaView>
   );
@@ -342,29 +325,18 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    backgroundColor: '#f5f5f5',
+    backgroundColor: '#FFFFFF',
   },
   header: {
-    backgroundColor: '#4a69bd',
+    backgroundColor: '#FFFFFF',
     padding: 16,
-    flexDirection: 'row',
-    alignItems: 'center',
-    justifyContent: 'space-between',
+    borderBottomWidth: StyleSheet.hairlineWidth,
+    borderBottomColor: '#E5E7EB',
   },
   headerText: {
-    color: 'white',
-    fontSize: 18,
-    fontWeight: 'bold',
-  },
-  settingsButton: {
-    backgroundColor: 'rgba(255, 255, 255, 0.2)',
-    paddingHorizontal: 12,
-    paddingVertical: 6,
-    borderRadius: 16,
-  },
-  settingsButtonText: {
-    color: 'white',
-    fontSize: 14,
+    color: '#000000',
+    fontSize: 20,
+    fontWeight: '600',
   },
   loadingContainer: {
     flex: 1,
@@ -382,20 +354,16 @@ const styles = StyleSheet.create({
     padding: 16,
   },
   threadItem: {
-    backgroundColor: 'white',
+    backgroundColor: '#FFFFFF',
     borderRadius: 12,
     padding: 16,
     marginBottom: 12,
-    flexDirection: 'row',
-    alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 1,
-    },
-    shadowOpacity: 0.22,
-    shadowRadius: 2.22,
-    elevation: 3,
+    // Shadow for iOS
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    // Elevation for Android
+    elevation: 2,
   },
   threadContent: {
     flex: 1,
@@ -403,20 +371,12 @@ const styles = StyleSheet.create({
   threadName: {
     fontSize: 16,
     fontWeight: '600',
-    color: '#333',
+    color: '#000000',
     marginBottom: 4,
   },
   threadTime: {
     fontSize: 14,
-    color: '#666',
-  },
-  threadArrow: {
-    marginLeft: 12,
-  },
-  arrowText: {
-    fontSize: 18,
-    color: '#ccc',
-    fontWeight: 'bold',
+    color: '#6B7280',
   },
   emptyContainer: {
     flex: 1,
@@ -442,20 +402,18 @@ const styles = StyleSheet.create({
     width: 56,
     height: 56,
     borderRadius: 28,
-    backgroundColor: '#4a69bd',
+    backgroundColor: '#000000',
     justifyContent: 'center',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: {
-      width: 0,
-      height: 2,
-    },
-    shadowOpacity: 0.25,
-    shadowRadius: 3.84,
-    elevation: 5,
+    // Shadow for iOS
+    shadowOpacity: 0.06,
+    shadowRadius: 4,
+    shadowOffset: { width: 0, height: 2 },
+    // Elevation for Android
+    elevation: 2,
   },
   fabText: {
-    color: 'white',
+    color: '#FFFFFF',
     fontSize: 24,
     fontWeight: 'bold',
   },
