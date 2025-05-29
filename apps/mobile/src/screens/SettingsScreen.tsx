@@ -1,5 +1,6 @@
-import { useEffect, useState } from "react";
-import { View, Text, TextInput, Pressable, StyleSheet, Button, ActivityIndicator, ScrollView } from "react-native";
+import { useEffect, useState, useRef } from "react";
+import { View, Text, TextInput, Pressable, StyleSheet, Button, ActivityIndicator } from "react-native";
+import { KeyboardAwareScrollView } from 'react-native-keyboard-aware-scroll-view';
 import { loadProfile, saveProfile } from "@mindbuddy/core/src/storage";
 import type { Profile } from "@mindbuddy/core/src/types";
 import { useNavigation } from "@react-navigation/native";
@@ -18,6 +19,9 @@ export default function SettingsScreen() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Refs for managing focus on dynamically added inputs
+  const newFactInputRef = useRef<TextInput>(null);
 
   // Load profile on mount
   useEffect(() => {
@@ -52,7 +56,7 @@ export default function SettingsScreen() {
     setProfile({ ...profile, ...patch });
   };
 
-  // Add a new blank fact
+  // Add a new blank fact with focus handling
   const addFact = () => {
     if (!profile) return;
     
@@ -63,6 +67,11 @@ export default function SettingsScreen() {
         { id: generateUniqueId(), text: "" }
       ]
     });
+    
+    // Focus the new input after it's rendered
+    setTimeout(() => {
+      newFactInputRef.current?.focus();
+    }, 50);
   };
   
   // Generate a unique ID for facts
@@ -110,7 +119,7 @@ export default function SettingsScreen() {
 
   if (isLoading) {
     return (
-      <View style={styles.container}>
+      <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color="#4a69bd" />
       </View>
     );
@@ -118,7 +127,7 @@ export default function SettingsScreen() {
 
   if (!profile) {
     return (
-      <View style={styles.container}>
+      <View style={styles.errorContainer}>
         <Text>Error loading profile.</Text>
         <Button title="Go Back" onPress={() => navigation.goBack()} />
       </View>
@@ -126,7 +135,13 @@ export default function SettingsScreen() {
   }
 
   return (
-    <ScrollView style={styles.container}>
+    <KeyboardAwareScrollView
+      style={{ flex: 1, backgroundColor: '#f5f5f5' }}
+      contentContainerStyle={{ padding: 16 }}
+      extraScrollHeight={20}        // small cushion
+      enableOnAndroid               // uses adjustResize on Android
+      keyboardOpeningTime={0}
+    >
       <View style={styles.section}>
         <Text style={styles.label}>Name</Text>
         <TextInput
@@ -134,6 +149,8 @@ export default function SettingsScreen() {
           value={profile.name}
           onChangeText={(text) => updateProfile({ name: text })}
           placeholder="Your name"
+          returnKeyType="next"
+          blurOnSubmit={false}
         />
       </View>
 
@@ -144,6 +161,8 @@ export default function SettingsScreen() {
           value={profile.pronouns}
           onChangeText={(text) => updateProfile({ pronouns: text })}
           placeholder="e.g. he/him, she/her, they/them"
+          returnKeyType="next"
+          blurOnSubmit={false}
         />
       </View>
 
@@ -174,11 +193,14 @@ export default function SettingsScreen() {
         {profile.core_facts.map((fact, index) => (
           <View key={fact.id} style={styles.factRow}>
             <TextInput
+              ref={index === profile.core_facts.length - 1 ? newFactInputRef : undefined}
               style={styles.factInput}
               value={fact.text}
               onChangeText={(text) => updateFact(index, text)}
               placeholder="Add a fact about yourself"
               multiline
+              returnKeyType="done"
+              blurOnSubmit={false}
             />
             <Pressable
               style={styles.deleteButton}
@@ -204,15 +226,20 @@ export default function SettingsScreen() {
       />
       
       <View style={styles.spacer} />
-    </ScrollView>
+    </KeyboardAwareScrollView>
   );
 }
 
 const styles = StyleSheet.create({
-  container: {
+  loadingContainer: {
     flex: 1,
-    padding: 16,
-    backgroundColor: "#f5f5f5",
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  errorContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
   },
   section: {
     marginBottom: 20,
