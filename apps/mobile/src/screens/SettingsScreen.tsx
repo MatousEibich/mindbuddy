@@ -5,6 +5,7 @@ import { loadProfile, saveProfile } from "@mindbuddy/core/src/storage";
 import type { Profile } from "@mindbuddy/core/src/types";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
+import { BUBBLE_ASSIST, BUBBLE_USER, TEXT_BLACK, BG_WHITE } from '../theme/colors';
 
 // Define navigation type
 type RootStackParamList = {
@@ -120,7 +121,7 @@ export default function SettingsScreen() {
   if (isLoading) {
     return (
       <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#4a69bd" />
+        <ActivityIndicator size="large" color={TEXT_BLACK} />
       </View>
     );
   }
@@ -136,7 +137,7 @@ export default function SettingsScreen() {
 
   return (
     <KeyboardAwareScrollView
-      style={{ flex: 1, backgroundColor: '#f5f5f5' }}
+      style={{ flex: 1, backgroundColor: BG_WHITE }}
       contentContainerStyle={{ padding: 16 }}
       extraScrollHeight={20}        // small cushion
       enableOnAndroid               // uses adjustResize on Android
@@ -219,11 +220,15 @@ export default function SettingsScreen() {
         </Pressable>
       </View>
 
-      <Button
-        title={isSaving ? "Saving..." : "Save"}
+      <Pressable
+        style={styles.saveButton}
         onPress={handleSave}
         disabled={isSaving}
-      />
+      >
+        <Text style={styles.saveButtonText}>
+          {isSaving ? "Saving..." : "Save"}
+        </Text>
+      </Pressable>
       
       <View style={styles.spacer} />
     </KeyboardAwareScrollView>
@@ -235,11 +240,13 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: BG_WHITE,
   },
   errorContainer: {
     flex: 1,
     justifyContent: 'center',
     alignItems: 'center',
+    backgroundColor: BG_WHITE,
   },
   section: {
     marginBottom: 20,
@@ -248,7 +255,7 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
     marginBottom: 8,
-    color: "#333",
+    color: TEXT_BLACK,
   },
   subText: {
     fontSize: 14,
@@ -256,12 +263,13 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   input: {
-    backgroundColor: "#fff",
+    backgroundColor: BG_WHITE,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#ddd",
     fontSize: 16,
+    color: TEXT_BLACK,
   },
   styleOptions: {
     flexDirection: "row",
@@ -270,7 +278,7 @@ const styles = StyleSheet.create({
   },
   styleOption: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: BG_WHITE,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
@@ -279,15 +287,15 @@ const styles = StyleSheet.create({
     alignItems: "center",
   },
   selectedStyle: {
-    backgroundColor: "#4a69bd",
-    borderColor: "#4a69bd",
+    backgroundColor: BUBBLE_ASSIST, // Darker sand color for selected style
+    borderColor: BUBBLE_ASSIST,
   },
   styleOptionText: {
-    color: "#333",
+    color: TEXT_BLACK,
     fontWeight: "500",
   },
   selectedStyleText: {
-    color: "#fff",
+    color: TEXT_BLACK,
     fontWeight: "600",
   },
   factRow: {
@@ -297,41 +305,56 @@ const styles = StyleSheet.create({
   },
   factInput: {
     flex: 1,
-    backgroundColor: "#fff",
+    backgroundColor: BG_WHITE,
     padding: 12,
     borderRadius: 8,
     borderWidth: 1,
     borderColor: "#ddd",
     fontSize: 16,
     minHeight: 44,
+    color: TEXT_BLACK,
   },
   deleteButton: {
     width: 44,
     height: 44,
     borderRadius: 22,
-    backgroundColor: "#ffeeee",
+    backgroundColor: "#F5F5F5", // Light gray background
     justifyContent: "center",
     alignItems: "center",
     marginLeft: 8,
     borderWidth: 1,
-    borderColor: "#ffdddd",
+    borderColor: "#E0E0E0", // Light gray border
   },
   deleteButtonText: {
-    color: "#ff5555",
+    color: TEXT_BLACK, // Black X
     fontSize: 18,
     fontWeight: "600",
   },
   addButton: {
-    backgroundColor: "#eef5ff",
+    backgroundColor: BUBBLE_ASSIST, // Warm sand color for add button
     padding: 12,
     borderRadius: 8,
     alignItems: "center",
     borderWidth: 1,
-    borderColor: "#ddeeff",
+    borderColor: BUBBLE_ASSIST,
     marginTop: 8,
   },
   addButtonText: {
-    color: "#4a69bd",
+    color: TEXT_BLACK, // Black text
+    fontWeight: "600",
+  },
+  saveButton: {
+    backgroundColor: BUBBLE_ASSIST,
+    padding: 16,
+    borderRadius: 8,
+    alignItems: "center",
+    marginTop: 20,
+    borderWidth: 1,
+    borderColor: BUBBLE_ASSIST,
+  },
+  saveButtonText: {
+    color: TEXT_BLACK,
+    fontSize: 16,
     fontWeight: "600",
   },
   spacer: {

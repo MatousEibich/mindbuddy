@@ -290,6 +290,13 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
         <Text style={styles.headerText}>Threads</Text>
+        <TouchableOpacity 
+          style={styles.settingsButton}
+          onPress={() => navigation.navigate('Settings')}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.settingsText}>⚙︎</Text>
+        </TouchableOpacity>
       </View>
 
       <FlatList
@@ -334,6 +341,9 @@ const styles = StyleSheet.create({
     padding: 16,
     borderBottomWidth: StyleSheet.hairlineWidth,
     borderBottomColor: '#E5E7EB',
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
   },
   headerText: {
     color: '#000000',
@@ -418,6 +428,16 @@ const styles = StyleSheet.create({
     color: '#FFFFFF',
     fontSize: 24,
     fontWeight: 'bold',
+  },
+  settingsButton: {
+    width: 32,
+    height: 32,
+    alignItems: 'center',
+    justifyContent: 'center',
+  },
+  settingsText: {
+    fontSize: 24,
+    color: '#000000',
   },
 });
 

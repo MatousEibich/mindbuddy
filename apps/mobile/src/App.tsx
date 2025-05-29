@@ -334,7 +334,13 @@ const App = () => {
         <Stack.Screen
           name="Settings"
           component={SettingsScreen}
-          options={{ title: 'Profile Settings' }}
+          options={{ 
+            title: 'Profile Settings',
+            headerTitleStyle: {
+              color: '#000000',
+            },
+            headerTintColor: '#000000', // This changes the back button color
+          }}
         />
       </Stack.Navigator>
     </NavigationContainer>
