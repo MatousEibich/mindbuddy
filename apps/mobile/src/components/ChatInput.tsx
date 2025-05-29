@@ -1,5 +1,6 @@
 import React from 'react';
-import { View, TextInput, TouchableOpacity, Text, StyleSheet } from 'react-native';
+import { View, TouchableOpacity, Text, StyleSheet, Platform } from 'react-native';
+import { AutoGrowingTextInput } from 'react-native-autogrow-textinput';
 
 interface ChatInputProps {
   value: string;
@@ -17,18 +18,20 @@ const ChatInput: React.FC<ChatInputProps> = ({
   const isDisabled = isLoading || !value.trim();
   
   return (
-    <View style={styles.inputContainer}>
-      <TextInput
+    <View style={styles.dock}>
+      <AutoGrowingTextInput
         style={styles.input}
+        placeholder="Type a message…"
+        placeholderTextColor="#8E8E93"
         value={value}
         onChangeText={onChangeText}
-        placeholder="Type a message…"
-        placeholderTextColor="#999"
-        multiline
+        maxHeight={36 * 6}      // grow up to ~6 lines
+        minHeight={36}
+        enableScrollToCaret     // keeps caret visible when over maxHeight
         editable={!isLoading}
       />
       <TouchableOpacity 
-        style={[styles.sendButton, isDisabled && styles.disabledButton]} 
+        style={[styles.sendBtn, isDisabled && styles.disabledButton]} 
         onPress={onSend}
         disabled={isDisabled}
       >
@@ -39,31 +42,29 @@ const ChatInput: React.FC<ChatInputProps> = ({
 };
 
 const styles = StyleSheet.create({
-  inputContainer: {
+  dock: {
     flexDirection: 'row',
-    height: 52,
     paddingHorizontal: 8,
-    paddingVertical: 8,
     borderTopWidth: StyleSheet.hairlineWidth,
     borderTopColor: '#E5E7EB',
     backgroundColor: '#FFFFFF',
-    alignItems: 'center',
+    alignItems: 'flex-end',
+    minHeight: 52,
   },
   input: {
     flex: 1,
     backgroundColor: '#E5E7EB',
     borderRadius: 24,
     paddingHorizontal: 16,
-    minHeight: 36,
-    maxHeight: 100,
+    paddingVertical: 8,
     fontSize: 16,
     color: '#000000',
   },
-  sendButton: {
-    width: 36,
-    height: 36,
+  sendBtn: {
     backgroundColor: '#000000',
     borderRadius: 24,
+    width: 40,
+    height: 40,
     marginLeft: 8,
     alignItems: 'center',
     justifyContent: 'center',
