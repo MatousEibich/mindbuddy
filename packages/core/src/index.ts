@@ -15,6 +15,9 @@ export * from "./utils/logger";
 // Storage system
 export * from "./storage/index";
 
+// Thread storage functions
+export * from "./threadStorage";
+
 // Memory system
 export * from "./memory/index";
 

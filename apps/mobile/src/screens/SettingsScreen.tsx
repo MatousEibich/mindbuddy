@@ -4,7 +4,6 @@ import { loadProfile, saveProfile } from "@mindbuddy/core/src/storage";
 import type { Profile } from "@mindbuddy/core/src/types";
 import { useNavigation } from "@react-navigation/native";
 import type { NativeStackNavigationProp } from "@react-navigation/native-stack";
-import { v4 as uuid } from "uuid";
 
 // Define navigation type
 type RootStackParamList = {
@@ -68,7 +67,6 @@ export default function SettingsScreen() {
   
   // Generate a unique ID for facts
   const generateUniqueId = (): number => {
-    // Convert UUID to a number by taking the first 10 digits of the timestamp
     return Date.now();
   };
 

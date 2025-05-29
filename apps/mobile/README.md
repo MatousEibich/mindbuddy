@@ -9,16 +9,19 @@ This is the mobile application for MindBuddy, built with:
 - React 19
 - React Native 0.79
 - Expo
+- React Navigation
 - AsyncStorage for data persistence
 - React Native's styling system
 
 ## Features
 
 - Native chat interface with an AI companion
-- User profile management
-- Conversation style customization
-- Core fact management
+- User profile management:
+  - Edit name and pronouns
+  - Select conversation style (mom, middle, or neil)
+  - Add, edit, and delete personal facts the AI will remember
 - Persistent conversation history
+- Settings screen for profile customization
 
 ## Getting Started
 
@@ -63,11 +66,15 @@ The mobile application:
 1. Uses the `@mindbuddy/core` package for business logic
 2. Implements AsyncStorage for data persistence
 3. Provides a native mobile UI for Android and iOS
+4. Uses React Navigation for multi-screen navigation
 
 ### Key Files
 
-- `App.tsx`: Main component and entry point
-- `index.js`: Application initialization
+- `App.tsx`: Main component with navigation setup
+- `screens/SettingsScreen.tsx`: Profile and core facts editor
+- `components/ChatMessage.tsx`: Chat message rendering
+- `components/ChatInput.tsx`: User input handling
+- `utils/chainWrapper.ts`: Integration with LLM chain
 
 ## Configuration
 
