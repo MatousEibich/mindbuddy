@@ -123,25 +123,19 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
     );
   };
 
-  // Handle thread actions (rename/delete)
-  const handleThreadActions = (thread: Thread) => {
-    const actions = ['Rename', 'Delete', 'Cancel'];
-    const destructiveButtonIndex = 1;
-    const cancelButtonIndex = 2;
-
+  // Handle thread actions (rename/delete) - Updated to match specification
+  const onThreadLongPress = (thread: Thread) => {
     if (Platform.OS === 'ios') {
       ActionSheetIOS.showActionSheetWithOptions(
         {
-          options: actions,
-          destructiveButtonIndex,
-          cancelButtonIndex,
+          title: thread.name,
+          options: ["Cancel", "Rename", "Delete"],
+          destructiveButtonIndex: 2,
+          cancelButtonIndex: 0,
         },
-        (buttonIndex) => {
-          if (buttonIndex === 0) {
-            handleRenameThread(thread);
-          } else if (buttonIndex === 1) {
-            handleDeleteThread(thread);
-          }
+        async (index) => {
+          if (index === 1) promptRename(thread);
+          if (index === 2) confirmDelete(thread);
         }
       );
     } else {
@@ -151,74 +145,68 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
         'Choose an action:',
         [
           {
+            text: 'Cancel',
+            style: 'cancel',
+          },
+          {
             text: 'Rename',
-            onPress: () => handleRenameThread(thread),
+            onPress: () => promptRename(thread),
           },
           {
             text: 'Delete',
             style: 'destructive',
-            onPress: () => handleDeleteThread(thread),
-          },
-          {
-            text: 'Cancel',
-            style: 'cancel',
+            onPress: () => confirmDelete(thread),
           },
         ]
       );
     }
   };
 
-  // Rename thread
-  const handleRenameThread = (thread: Thread) => {
+  // Rename flow
+  const promptRename = async (t: Thread) => {
     Alert.prompt(
-      'Rename Conversation',
-      'Enter a new name:',
-      [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
-        {
-          text: 'Rename',
-          onPress: async (newName) => {
-            if (newName && newName.trim() && newName.trim() !== thread.name) {
-              try {
-                await renameThread(thread.id, newName.trim());
-                await loadThreads(); // Reload to show updated name
-              } catch (error) {
-                console.error('Error renaming thread:', error);
-                Alert.alert('Error', 'Failed to rename conversation.');
-              }
-            }
-          },
-        },
-      ],
+      'Rename thread',
+      undefined,
+      async (newName) => {
+        if (newName && newName.trim() && newName.trim() !== t.name) {
+          try {
+            await renameThread(t.id, newName.trim());
+            await loadThreads(); // refreshThreadList
+          } catch (error) {
+            console.error('Error renaming thread:', error);
+            Alert.alert('Error', 'Failed to rename conversation.');
+          }
+        }
+      },
       'plain-text',
-      thread.name,
-      'default'
+      t.name
     );
   };
 
-  // Delete thread
-  const handleDeleteThread = (thread: Thread) => {
+  // Delete flow
+  const confirmDelete = async (t: Thread) => {
     Alert.alert(
-      'Delete Conversation',
-      `Are you sure you want to delete "${thread.name}"? This cannot be undone.`,
+      'Delete this thread?',
+      `All messages in "${t.name}" will be permanently removed.`,
       [
-        {
-          text: 'Cancel',
-          style: 'cancel',
-        },
+        { text: 'Cancel', style: 'cancel' },
         {
           text: 'Delete',
           style: 'destructive',
           onPress: async () => {
             try {
-              await deleteThread(thread.id);
-              await loadThreads(); // Reload to remove deleted thread
+              await deleteThread(t.id);
+              await loadThreads(); // refreshThreadList
               
-              // Note: If the deleted thread is currently open in Chat screen,
-              // the navigation will handle it when user goes back
+              // If list now empty ⇒ create a "New Chat" thread
+              const remaining = await listThreads();
+              if (remaining.length === 0) {
+                const first = await createThread('New Chat');
+                navigation.navigate('Chat', { 
+                  threadId: first.id, 
+                  threadName: first.name 
+                });
+              }
             } catch (error) {
               console.error('Error deleting thread:', error);
               Alert.alert('Error', 'Failed to delete conversation.');
@@ -227,6 +215,20 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
         },
       ]
     );
+  };
+
+  // Legacy method kept for compatibility (can be removed later)
+  const handleThreadActions = (thread: Thread) => {
+    onThreadLongPress(thread);
+  };
+
+  // Legacy methods kept for compatibility (can be removed later)
+  const handleRenameThread = (thread: Thread) => {
+    promptRename(thread);
+  };
+
+  const handleDeleteThread = (thread: Thread) => {
+    confirmDelete(thread);
   };
 
   // Navigate to chat with selected thread
@@ -257,7 +259,7 @@ const ThreadsScreen = ({ navigation }: ThreadsScreenProps) => {
     <TouchableOpacity
       style={styles.threadItem}
       onPress={() => handleSelectThread(item)}
-      onLongPress={() => handleThreadActions(item)}
+      onLongPress={() => onThreadLongPress(item)}
       activeOpacity={0.7}
     >
       <View style={styles.threadContent}>
