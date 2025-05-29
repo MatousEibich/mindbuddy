@@ -1,8 +1,8 @@
 // Theme colors for MindBuddy app
 
 // Message bubble colors - Warm Sand palette
-export const BUBBLE_ASSIST = "#FDF8F2";
-export const BUBBLE_USER = "#F6D7A7";
+export const BUBBLE_ASSIST = "#F8E5C8"; // Lighter version of the darker sand tone for AI
+export const BUBBLE_USER = "#FDF8F2";   // Light warm sand for user
 
 // Text colors
 export const TEXT_BLACK = "#000000";

@@ -1,5 +1,6 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
+import { BUBBLE_ASSIST, BUBBLE_USER, TEXT_BLACK } from '../theme/colors';
 
 interface Message {
   id: string;
@@ -20,10 +21,7 @@ const ChatMessage: React.FC<ChatMessageProps> = ({ message }) => {
         message.role === 'user' ? styles.userBubble : styles.assistantBubble
       ]}
     >
-      <Text style={[
-        styles.messageText,
-        message.role === 'user' ? styles.userText : styles.assistantText
-      ]}>
+      <Text style={styles.messageText}>
         {message.content}
       </Text>
     </View>
@@ -44,21 +42,16 @@ const styles = StyleSheet.create({
     elevation: 2,
   },
   userBubble: {
-    backgroundColor: '#000000',
+    backgroundColor: BUBBLE_USER,
     alignSelf: 'flex-end',
   },
   assistantBubble: {
-    backgroundColor: '#F3F4F6',
+    backgroundColor: BUBBLE_ASSIST,
     alignSelf: 'flex-start',
   },
   messageText: {
     fontSize: 16,
-  },
-  userText: {
-    color: '#FFFFFF',
-  },
-  assistantText: {
-    color: '#000000',
+    color: TEXT_BLACK,
   },
 });
 
