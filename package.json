@@ -42,10 +42,5 @@
 		"react-native-fs": "^2.20.0",
 		"scrypt-js": "^3.0.1",
 		"util": "^0.12.5"
-	},
-	"overrides": {
-		"browserify-sign": "4.2.2",
-		"hash-base": "3.0.4",
-		"readable-stream": "3.6.2"
 	}
 }

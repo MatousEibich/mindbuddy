@@ -23,7 +23,10 @@ debug('INIT', 'Starting MindBuddy mobile app');
 if (!Array.prototype.reduce || global.__patchReduce) {
   debug('PATCH', 'Adding Array.reduce polyfill');
   Array.prototype.reduce = function(callback, initialValue) {
+    debug('REDUCE', `Called on: ${this}, type: ${typeof this}`);
+    
     if (this === null || this === undefined) {
+      debug('REDUCE', 'Array is null/undefined, returning initial value');
       return initialValue;
     }
     
@@ -32,8 +35,11 @@ if (!Array.prototype.reduce || global.__patchReduce) {
     var value = initialValue;
     var i = 0;
     
+    debug('REDUCE', `Array length: ${length}, initial value: ${initialValue}`);
+    
     if (arguments.length < 2) {
       if (length === 0) {
+        debug('REDUCE', 'Empty array without initial value, returning undefined');
         return undefined;
       }
       value = array[0];
@@ -46,19 +52,26 @@ if (!Array.prototype.reduce || global.__patchReduce) {
       }
     }
     
+    debug('REDUCE', `Reduce completed, result: ${value}`);
     return value;
   };
 }
 
 // Import and register the app
 try {
-  debug('APP', 'Registering React component');
+  debug('APP', 'Importing React Native');
   const { AppRegistry } = require('react-native');
+  
+  debug('APP', 'Importing App component');
   const { App } = require('./src');
   
+  debug('APP', `App component: ${App}`);
+  
   // Important: The component name MUST be 'main' for Expo
+  debug('APP', 'Registering component');
   AppRegistry.registerComponent('main', () => App);
   debug('APP', 'App registered successfully');
 } catch (e) {
   console.error('[FATAL] Failed to register app:', e);
+  console.error('[FATAL] Stack trace:', e.stack);
 } 

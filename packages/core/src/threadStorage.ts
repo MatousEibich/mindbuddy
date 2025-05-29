@@ -1,7 +1,14 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import { v4 as uuid } from "uuid";
 import { Message } from "./message";
 import { Thread } from "./types";
+
+// React Native compatible UUID generator (avoiding Node.js crypto)
+let idCounter = 0;
+const generateId = () => {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 10000);
+  return `thread_${timestamp}_${random}_${idCounter++}`;
+};
 
 /* ───────── storage keys ───────── */
 const THREAD_LIST_KEY = "mindbuddy.threads";
@@ -14,7 +21,7 @@ export async function listThreads(): Promise<Thread[]> {
 }
 
 export async function createThread(name: string): Promise<Thread> {
-  const thread: Thread = { id: uuid(), name, created: Date.now() };
+  const thread: Thread = { id: generateId(), name, created: Date.now() };
   const all = await listThreads();
   await AsyncStorage.multiSet([
     [THREAD_LIST_KEY, JSON.stringify([...all, thread])],

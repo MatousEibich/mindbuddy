@@ -21,6 +21,7 @@ import type { Profile } from '@mindbuddy/core';
 // Import storage methods from core
 import { AsyncStorageAdapter } from '@mindbuddy/core/src/storage/AsyncStorageAdapter';
 import { setDefaultStorage, saveMessage, loadLastN, loadProfile } from '@mindbuddy/core/src/storage';
+import { loadThreadMessages } from '@mindbuddy/core';
 import type { Message as CoreMessage } from '@mindbuddy/core/src/message';
 import { STORAGE } from '@mindbuddy/core/src/config';
 
@@ -36,18 +37,21 @@ import type { NativeStackNavigationProp } from '@react-navigation/native-stack';
 
 // Import screens
 import SettingsScreen from './screens/SettingsScreen';
+import ThreadsScreen from './screens/ThreadsScreen';
 
 // Import profile from the core package
 import profileData from '@mindbuddy/core/src/profile.json';
 
 // Define stack navigator type
 type RootStackParamList = {
-  Chat: undefined;
+  Threads: undefined;
+  Chat: { threadId: string; threadName: string };
   Settings: undefined;
 };
 
 type ChatScreenProps = {
   navigation: NativeStackNavigationProp<RootStackParamList, 'Chat'>;
+  route: { params: { threadId: string; threadName: string } };
 };
 
 const Stack = createNativeStackNavigator<RootStackParamList>();
@@ -101,21 +105,16 @@ const generateId = () => `msg_${messageIdCounter++}`;
 /**
  * Chat Screen Component
  */
-const ChatScreen = ({ navigation }: ChatScreenProps) => {
-  const [messages, setMessages] = useState<AppMessage[]>([
-    {
-      id: generateId(),
-      role: 'assistant',
-      content: 'Welcome to MindBuddy! How can I help you today?',
-      timestamp: Date.now(),
-    }
-  ]);
+const ChatScreen = ({ navigation, route }: ChatScreenProps) => {
+  const { threadId, threadName } = route.params;
+  
+  const [messages, setMessages] = useState<AppMessage[]>([]);
   const [input, setInput] = useState('');
   const [chain, setChain] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
   const [profile, setProfile] = useState<Profile | null>(null);
 
-  // Reload profile and rebuild chain when screen comes into focus
+  // Reload profile and rebuild chain when screen comes into focus or threadId changes
   useFocusEffect(
     useCallback(() => {
       async function refreshProfile() {
@@ -123,7 +122,6 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
           const loadedProfile = await loadProfile();
           if (loadedProfile) {
             setProfile(loadedProfile);
-            const threadId = "default";            // hard-coded placeholder
             const realChain = createRealChain(loadedProfile, cleanedApiKey, threadId);
             setChain(realChain);
           }
@@ -134,22 +132,40 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
       
       refreshProfile();
       
-      // Load previous messages
+      // Load thread-specific messages
       (async () => {
-        const coreMessages = await loadLastN(40);
-        if (coreMessages && coreMessages.length > 0) {
-          const appMessages = coreMessages.map(coreToAppMessage);
-          setMessages(appMessages);
+        try {
+          const coreMessages = await loadThreadMessages(threadId);
+          if (coreMessages && coreMessages.length > 0) {
+            const appMessages = coreMessages.map(coreToAppMessage);
+            setMessages(appMessages);
+          } else {
+            // Show welcome message for new/empty threads
+            setMessages([{
+              id: generateId(),
+              role: 'assistant',
+              content: `Welcome to ${threadName}! How can I help you today?`,
+              timestamp: Date.now(),
+            }]);
+          }
+        } catch (error) {
+          console.error("Failed to load thread messages:", error);
+          setMessages([{
+            id: generateId(),
+            role: 'assistant',
+            content: 'Welcome to MindBuddy! How can I help you today?',
+            timestamp: Date.now(),
+          }]);
         }
       })();
-    }, [])
+    }, [threadId, threadName])
   );
 
-  // Clear chat history
+  // Clear current thread history
   const clearHistory = () => {
     Alert.alert(
-      "Clear Chat History",
-      "Are you sure you want to clear all chat history? This cannot be undone.",
+      "Clear Thread History",
+      `Are you sure you want to clear the history for "${threadName}"? This cannot be undone.`,
       [
         {
           text: "Cancel",
@@ -160,28 +176,19 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
           style: "destructive",
           onPress: async () => {
             try {
-              // Clear AsyncStorage
-              await AsyncStorage.removeItem(STORAGE.MSG_KEY);
+              // Clear thread messages by setting empty array
+              await AsyncStorage.setItem(`mindbuddy.thread.${threadId}`, JSON.stringify([]));
               
               // Reset UI state
               setMessages([{
                 id: generateId(),
                 role: 'assistant',
-                content: 'Chat history has been cleared. How can I help you today?',
+                content: `Thread history cleared. How can I help you today?`,
                 timestamp: Date.now(),
               }]);
-              
-              // Save the welcome message
-              const welcomeMessage: CoreMessage = {
-                id: generateId(),
-                role: 'assistant',
-                content: 'Chat history has been cleared. How can I help you today?',
-                ts: Date.now(),
-              };
-              await saveMessage(welcomeMessage);
             } catch (error) {
-              console.error("Failed to clear history:", error);
-              Alert.alert("Error", "Failed to clear chat history. Please try again.");
+              console.error("Failed to clear thread history:", error);
+              Alert.alert("Error", "Failed to clear thread history. Please try again.");
             }
           }
         }
@@ -204,9 +211,6 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
     // Add user message to chat
     setMessages(prev => [...prev, userMessage]);
     
-    // Save user message to storage
-    await saveMessage(appToCoreMessage(userMessage));
-    
     // Clear input
     setInput('');
     
@@ -219,9 +223,6 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
         timestamp: Date.now(),
       };
       setMessages(prev => [...prev, errorMessage]);
-      
-      // Save error message to storage
-      await saveMessage(appToCoreMessage(errorMessage));
       return;
     }
     
@@ -229,7 +230,7 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
     setIsLoading(true);
     
     try {
-      // Call the LLM chain
+      // Call the LLM chain (it handles saving to thread storage)
       const result = await chain.invoke({ query: userMessage.content });
       
       // Create bot message from response
@@ -243,8 +244,6 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
       // Add bot message to chat
       setMessages(prev => [...prev, botMessage]);
       
-      // Save bot message to storage
-      await saveMessage(appToCoreMessage(botMessage));
     } catch (err) {
       console.error("LLM call failed", err);
       
@@ -257,9 +256,6 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
       };
       
       setMessages(prev => [...prev, errorMessage]);
-      
-      // Save error message to storage
-      await saveMessage(appToCoreMessage(errorMessage));
     } finally {
       setIsLoading(false);
     }
@@ -268,7 +264,16 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.header}>
-        <Text style={styles.headerText}>MindBuddy</Text>
+        <TouchableOpacity 
+          style={styles.backButton} 
+          onPress={() => navigation.goBack()}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.backButtonText}>‹ Back</Text>
+        </TouchableOpacity>
+        <Text style={styles.headerText} numberOfLines={1}>
+          {threadName}
+        </Text>
         <View style={styles.headerButtons}>
           <TouchableOpacity 
             style={styles.headerButton} 
@@ -320,7 +325,12 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
 const App = () => {
   return (
     <NavigationContainer>
-      <Stack.Navigator>
+      <Stack.Navigator initialRouteName="Threads">
+        <Stack.Screen
+          name="Threads"
+          component={ThreadsScreen}
+          options={{ headerShown: false }}
+        />
         <Stack.Screen
           name="Chat"
           component={ChatScreen}
@@ -348,10 +358,25 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'space-between',
   },
+  backButton: {
+    backgroundColor: 'rgba(255, 255, 255, 0.2)',
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 16,
+    marginRight: 12,
+  },
+  backButtonText: {
+    color: 'white',
+    fontSize: 16,
+    fontWeight: '600',
+  },
   headerText: {
     color: 'white',
     fontSize: 18,
     fontWeight: 'bold',
+    flex: 1,
+    textAlign: 'center',
+    marginHorizontal: 12,
   },
   headerButtons: {
     flexDirection: 'row',

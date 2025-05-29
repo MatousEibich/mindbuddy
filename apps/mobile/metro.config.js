@@ -21,34 +21,40 @@ config.resolver.nodeModulesPaths = [
   path.resolve(workspaceRoot, 'node_modules')
 ];
 
-// Create mock implementations for crypto-related modules
-const createMockImplementation = (moduleName) => {
-  console.log(`Creating mock implementation for ${moduleName}`);
-  return path.resolve(projectRoot, `./mocks/${moduleName}.js`);
-};
-
-// Add Node.js polyfills for React Native
+// Add Node.js polyfills for React Native - simplified approach
 config.resolver.extraNodeModules = {
-  path: require.resolve('path-browserify'),
-  fs: require.resolve('react-native-fs'),
-  os: require.resolve('os-browserify/browser'),
-  // Provide safe mock implementations for crypto modules
-  crypto: path.resolve(projectRoot, './mocks/crypto.js'),
-  'browserify-sign': path.resolve(projectRoot, './mocks/browserify-sign.js'),
-  stream: require.resolve('stream-browserify'),
+  // Essential polyfills
   buffer: require.resolve('buffer'),
+  crypto: require.resolve('crypto-browserify'),
+  stream: require.resolve('stream-browserify'),
+  process: require.resolve('process/browser'),
+  
+  // Use empty-module for problematic crypto dependencies that cause bundling issues
+  'crypto-js': require.resolve('empty-module'),
+  'node:crypto': require.resolve('empty-module'),
+  'browserify-sign': require.resolve('empty-module'),
+  'create-hmac': require.resolve('empty-module'),
+  'pbkdf2': require.resolve('empty-module'),
+  'randombytes': require.resolve('empty-module'),
+  'ripemd160': require.resolve('empty-module'),
+  'sha.js': require.resolve('empty-module'),
+  
+  // Other Node.js polyfills
+  path: require.resolve('path-browserify'),
+  fs: require.resolve('empty-module'), // React Native doesn't support fs
+  os: require.resolve('os-browserify/browser'),
   events: require.resolve('events'),
   inherits: require.resolve('inherits'),
-  process: require.resolve('process/browser'),
   zlib: require.resolve('browserify-zlib'),
   util: require.resolve('util'),
   assert: require.resolve('assert/'),
+  
   // Add workspace packages
   '@mindbuddy/core': path.resolve(workspaceRoot, 'packages/core'),
   '@mindbuddy/ui': path.resolve(workspaceRoot, 'packages/ui')
 };
 
-// Don't try to resolve symlinks
+// Don't try to resolve symlinks for stability
 config.resolver.disableHierarchicalLookup = true;
 
 // Configure symlink resolution

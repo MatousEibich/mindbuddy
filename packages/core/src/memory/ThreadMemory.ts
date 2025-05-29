@@ -1,10 +1,17 @@
 import { BaseMemory } from "@langchain/core/memory";
 import { AIMessage, HumanMessage } from "@langchain/core/messages";
-import { v4 as uuid } from "uuid";
 import { loadThreadMessages, appendThreadMessages } from "../threadStorage";
 import { Profile } from "../types";
 import { Message as DBMessage } from "../message";
 import { createLogger } from "../utils/logger";
+
+// React Native compatible UUID generator (avoiding Node.js crypto)
+let msgIdCounter = 0;
+const generateMsgId = () => {
+  const timestamp = Date.now();
+  const random = Math.floor(Math.random() * 10000);
+  return `msg_${timestamp}_${random}_${msgIdCounter++}`;
+};
 
 const logger = createLogger('THREAD-MEMORY');
 
@@ -60,14 +67,14 @@ export class ThreadMemory extends BaseMemory {
     
     const t = Date.now();
     const userMsg: DBMessage = { 
-      id: uuid(), 
+      id: generateMsgId(), 
       role: "user", 
       content: input.query, 
       ts: t 
     };
     
     const botMsg: DBMessage = { 
-      id: uuid(), 
+      id: generateMsgId(), 
       role: "assistant", 
       content: output.text, 
       ts: t + 1 

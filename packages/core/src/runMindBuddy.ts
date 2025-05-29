@@ -1,4 +1,3 @@
-import "dotenv/config";
 import { ChatOpenAI } from "@langchain/openai";
 import { renderPrompt } from "./renderPrompt";
 import { Profile } from "./types";

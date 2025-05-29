@@ -4,7 +4,10 @@ import { stringifyHistory } from '@mindbuddy/core/src/renderPrompt';
 import { CRISIS_HANDOFF } from '@mindbuddy/core/src/types';
 import type { Message } from '@mindbuddy/core/src/message';
 import { loadThreadMessages, appendThreadMessages } from '@mindbuddy/core/src/threadStorage';
-import { v4 as uuid } from 'uuid';
+
+// Simple ID generator for React Native (avoiding Node.js crypto)
+let messageIdCounter = 0;
+const generateId = () => `msg_mobile_${Date.now()}_${messageIdCounter++}`;
 
 /**
  * A lightweight chain implementation that directly calls OpenAI API
@@ -69,14 +72,14 @@ export function createRealChain(profile: Profile, apiKey: string, threadId: stri
         // Create user and assistant messages
         const t = Date.now();
         const userMessage: Message = {
-          id: uuid(),
+          id: generateId(),
           role: "user",
           content: query,
           ts: t
         };
         
         const assistantMessage: Message = {
-          id: uuid(),
+          id: generateId(),
           role: "assistant",
           content,
           ts: t + 1
