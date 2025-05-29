@@ -1,0 +1,25 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Testing Mobile App
+
+## Running Development Server
+
+To test mobile app with real-time debugging:
+
+```bash
+cd apps/mobile
+npm start
+```
+
+**Important**: Run `npm start` in **foreground** (without `&` or background flags) so console logs are directly visible for debugging. This allows you to see:
+- App startup logs
+- Error messages 
+- Voice module initialization
+- Permission requests
+- Real-time debugging output
+
+
+In PowerShell, avoid using `&&` syntax - run commands separately.
