@@ -1,4 +1,5 @@
 export * from './StorageMemory';
+export * from './ThreadMemory';
 
 // Re-export functions to maintain backward compatibility
 import { StorageMemory } from './StorageMemory';

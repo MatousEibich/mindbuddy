@@ -3,12 +3,14 @@ import { MINDBUDDY_TEMPLATE, STYLE_INSTRUCTIONS } from '@mindbuddy/core/src/prom
 import { stringifyHistory } from '@mindbuddy/core/src/renderPrompt';
 import { CRISIS_HANDOFF } from '@mindbuddy/core/src/types';
 import type { Message } from '@mindbuddy/core/src/message';
+import { loadThreadMessages, appendThreadMessages } from '@mindbuddy/core/src/threadStorage';
+import { v4 as uuid } from 'uuid';
 
 /**
  * A lightweight chain implementation that directly calls OpenAI API
- * without dependency on Node.js modules
+ * and uses thread storage for persistence
  */
-export function createRealChain(profile: Profile, apiKey: string) {
+export function createRealChain(profile: Profile, apiKey: string, threadId: string = "default") {
   // Validate the API key
   if (!apiKey || !apiKey.startsWith('sk-')) {
     throw new Error('Invalid API key format');
@@ -20,24 +22,11 @@ export function createRealChain(profile: Profile, apiKey: string) {
     .replace(/\s/g, '')    // Remove any whitespace
     .trim();               // Final trim just in case
   
-  // Store chat history
-  let chatMessages: Message[] = [];
-  
-  // Generate message IDs
-  let messageId = 0;
-  const generateId = () => `msg_${messageId++}`;
-  
   return {
     invoke: async ({ query }: { query: string }) => {
       try {
-        // Add user message to history
-        const userMessage: Message = {
-          id: generateId(),
-          role: "user",
-          content: query,
-          ts: Date.now()
-        };
-        chatMessages.push(userMessage);
+        // Load existing chat history from thread storage
+        const chatMessages = await loadThreadMessages(threadId);
         
         // Convert the chat history to a string
         const chatHistory = stringifyHistory(chatMessages, profile);
@@ -77,14 +66,24 @@ export function createRealChain(profile: Profile, apiKey: string) {
         const data = await response.json();
         const content = data.choices[0].message.content;
         
-        // Add assistant message to history
+        // Create user and assistant messages
+        const t = Date.now();
+        const userMessage: Message = {
+          id: uuid(),
+          role: "user",
+          content: query,
+          ts: t
+        };
+        
         const assistantMessage: Message = {
-          id: generateId(),
+          id: uuid(),
           role: "assistant",
           content,
-          ts: Date.now()
+          ts: t + 1
         };
-        chatMessages.push(assistantMessage);
+        
+        // Save both messages to thread storage
+        await appendThreadMessages(threadId, [userMessage, assistantMessage]);
         
         return { text: content };
       } catch (error) {

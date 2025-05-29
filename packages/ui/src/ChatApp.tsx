@@ -119,7 +119,8 @@ const ChatApp = () => {
       keyPrefix
     });
 
-    buildMindBuddyChain(profile)
+    const threadId = "default";            // hard-coded placeholder
+    buildMindBuddyChain(profile, threadId)
       .then((chain: any) => {
         chainRef.current = chain;
         setChainStatus('success');

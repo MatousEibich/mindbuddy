@@ -123,7 +123,8 @@ const ChatScreen = ({ navigation }: ChatScreenProps) => {
           const loadedProfile = await loadProfile();
           if (loadedProfile) {
             setProfile(loadedProfile);
-            const realChain = createRealChain(loadedProfile, cleanedApiKey);
+            const threadId = "default";            // hard-coded placeholder
+            const realChain = createRealChain(loadedProfile, cleanedApiKey, threadId);
             setChain(realChain);
           }
         } catch (error) {

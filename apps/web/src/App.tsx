@@ -139,7 +139,8 @@ export default function App() {
 					await saveProfileToStorage(prof);
 				}
 				setProfile(prof);
-				chainRef.current = await buildMindBuddyChain(prof);
+				const threadId = "default";            // hard-coded placeholder
+				chainRef.current = await buildMindBuddyChain(prof, threadId);
 			} catch (error) {
 				console.error("Error initializing app:", error);
 			}
@@ -152,7 +153,8 @@ export default function App() {
 		await saveProfileToStorage(p);
 		setProfile(p);
 		// rebuild chain so new style applies
-		chainRef.current = await buildMindBuddyChain(p);
+		const threadId = "default";            // hard-coded placeholder
+		chainRef.current = await buildMindBuddyChain(p, threadId);
 		setShowSettings(false);
 	}
 
