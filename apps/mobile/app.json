@@ -16,14 +16,19 @@
       "**/*"
     ],
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSSpeechRecognitionUsageDescription": "MindBuddy needs access to speech recognition to transcribe your voice.",
+        "NSMicrophoneUsageDescription": "MindBuddy needs the microphone to capture your voice."
+      }
     },
     "android": {
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#ffffff"
+      },
+      "permissions": ["RECORD_AUDIO"]
     }
-  }
   },
   "name": "mobile"
 }
